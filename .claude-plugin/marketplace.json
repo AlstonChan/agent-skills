@@ -1,16 +1,30 @@
 {
   "name": "alstonchan",
   "owner": {
-    "name": "Chan Alston"
+    "name": "Chan Alston",
+    "email": "git@chanalston.com"
   },
   "metadata": {
-    "description": "Agent skills by Chan Alston."
+    "description": "Agent skills by Chan Alston. Each skill is its own plugin."
   },
   "plugins": [
     {
-      "name": "agent-skills",
+      "name": "component-knowledge-base",
+      "description": "Build a docs/ knowledge base for one component folder: its why, history, flows and known issues.",
+      "version": "0.1.0",
+      "license": "MIT",
       "source": "./",
-      "description": "Skills for documenting component folders and standardizing WPF/XAML styling."
+      "strict": false,
+      "skills": ["./skills/component-knowledge-base"]
+    },
+    {
+      "name": "wpf-design-system",
+      "description": "Conventions for standardizing WPF/XAML styling into a design system.",
+      "version": "0.1.0",
+      "license": "MIT",
+      "source": "./",
+      "strict": false,
+      "skills": ["./skills/wpf-design-system"]
     }
   ]
 }

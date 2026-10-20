@@ -9,14 +9,13 @@ Agent skills for Claude Code and other tools that read the Agent Skills format.
 
 ## Install
 
-As a Claude Code plugin:
+As Claude Code plugins — each skill is its own plugin, so install only the ones you want:
 
 ```text
 /plugin marketplace add AlstonChan/agent-skills
-/plugin install agent-skills@alstonchan
+/plugin install component-knowledge-base@alstonchan
+/plugin install wpf-design-system@alstonchan
 ```
-
-The skills are then available as `agent-skills:<name>`.
 
 Manually: copy `skills/<name>/` into `~/.claude/skills/`, or into the skills directory of any
 other tool that supports the format.
