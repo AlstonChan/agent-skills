@@ -1,0 +1,11 @@
+{
+  "name": "agent-skills",
+  "description": "Skills for documenting component folders and standardizing WPF/XAML styling.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Chan Alston",
+    "email": "git@chanalston.com"
+  },
+  "repository": "https://github.com/AlstonChan/agent-skills",
+  "license": "MIT"
+}

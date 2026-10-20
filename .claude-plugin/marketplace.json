@@ -1,0 +1,16 @@
+{
+  "name": "alstonchan",
+  "owner": {
+    "name": "Chan Alston"
+  },
+  "metadata": {
+    "description": "Agent skills by Chan Alston."
+  },
+  "plugins": [
+    {
+      "name": "agent-skills",
+      "source": "./",
+      "description": "Skills for documenting component folders and standardizing WPF/XAML styling."
+    }
+  ]
+}
