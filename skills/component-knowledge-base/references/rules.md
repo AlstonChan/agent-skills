@@ -11,11 +11,11 @@ component's own folder**. If the repository builds a docs site, it collects ever
 a components section.
 
 - **One `docs/` per module, beside its code — never one shared folder at the root of `src/`.**
-  Knowledge about auth goes in `src/auth/docs/`, about accounts in `src/accounts/docs/`:
+  Knowledge about auth goes in `src/auth/docs/`, about billing in `src/billing/docs/`:
 
   ```text
   src/auth/docs/overview.md       ✓ auth only
-  src/accounts/docs/overview.md   ✓ accounts only
+  src/billing/docs/overview.md    ✓ billing only
   src/docs/auth.md                ✗ never
   ```
 
@@ -33,7 +33,8 @@ a components section.
   `known-issues.md` exist only when they have content.
 - **Links follow the dependencies.** A consumer's docs link down to what they build on; a lower
   layer's docs never list their consumers — that is what Find References is for.
-- **Register a new `docs/` folder in the docs site's table of contents**, if there is one, and
-  render the site with no new warnings.
+- **Register every page in the docs site's table of contents**, if there is one: the overview as
+  the module's entry, and `flows.md`, `decisions.md`, `history.md` or `known-issues.md` as its
+  children in the same commit that creates them. Render the site with no new warnings.
 - **Never write a guessed reason as fact.** A reason that neither the code, the history nor the
   owner confirmed is marked `Unconfirmed`.
