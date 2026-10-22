@@ -6,10 +6,21 @@ only when the skill runs.
 
 ## Knowledge base
 
-The why, the history and the flows of a component live in a **`docs/` folder beside its code**,
-e.g. `src/Orders/docs/`. If the repository builds a docs site, it collects every one of them into
+The why, the history and the flows of a component live in a **`docs/` folder inside that
+component's own folder**. If the repository builds a docs site, it collects every one of them into
 a components section.
 
+- **One `docs/` per module, beside its code — never one shared folder at the root of `src/`.**
+  Knowledge about auth goes in `src/auth/docs/`, about accounts in `src/accounts/docs/`:
+
+  ```text
+  src/auth/docs/overview.md       ✓ auth only
+  src/accounts/docs/overview.md   ✓ accounts only
+  src/docs/auth.md                ✗ never
+  ```
+
+  Use the smallest folder that owns the fact. Knowledge spanning modules goes in the lowest module
+  that owns it; system-wide architecture goes in the repository's architecture doc.
 - **Read a folder's `docs/` before changing that folder, and update it in the same commit** when
   the change alters behaviour, a decision or a flow it describes.
 - **Write in the repository's language** — docs, commit messages and comments alike — whatever

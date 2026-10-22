@@ -3,8 +3,9 @@
 <One paragraph: what this folder is for and where it sits. Say what it does not own if that is
 easy to get wrong.>
 
-<For a consumer folder:> Builds on [<Core component>](../../../<path>/docs/overview.md), which
-owns <what>.
+<For a consumer folder, link down to the module it builds on, relative to this file. From
+src/accounts/docs/overview.md:> Builds on [Auth](../../auth/docs/overview.md), which owns
+<what>.
 
 ## What this folder owns
 
