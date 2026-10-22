@@ -1,14 +1,45 @@
 ---
 name: component-knowledge-base
-description: 'Build the docs/ knowledge base for one component folder - its why, history, flows and known issues - from the code, the git history and an interview with the owner. Use when asked to document a folder, start a docs/ folder, or "write down the why" for a module. Maintenance of an existing docs/ folder follows references/rules.md, which belongs in the repository''s CLAUDE.md or AGENTS.md so it applies on every change.'
+description: 'Build the docs/ knowledge base for one component folder - its why, history, flows and known issues - inside that module''s own folder (src/auth/docs/, never one shared src/docs/), from the code, the git history and an interview with the owner. Use when asked to document a folder, start a docs/ folder, or "write down the why" for a module. Maintenance of an existing docs/ folder follows references/rules.md, which belongs in the repository''s CLAUDE.md or AGENTS.md so it applies on every change.'
 ---
 
 # Component knowledge base
 
-Builds `<folder>/docs/` for one component. The rules the result must obey are in
-[references/rules.md](references/rules.md); this skill is the procedure for getting there. If the
-repository's `CLAUDE.md` or `AGENTS.md` does not carry those rules yet, offer to add them so later
-changes keep the docs current.
+Builds a `docs/` folder inside one module's own folder, for that module only. The rules the result
+must obey are in [references/rules.md](references/rules.md); this skill is the procedure for
+getting there. If the repository's `CLAUDE.md` or `AGENTS.md` does not carry those rules yet, offer
+to add them so later changes keep the docs current.
+
+## Where docs/ goes
+
+Each module keeps its knowledge next to its code. A shared folder at the root of `src/` is never
+the place:
+
+```text
+src/
+├── auth/
+│   ├── docs/              ← auth's knowledge, and only auth's
+│   │   ├── overview.md
+│   │   └── decisions.md
+│   ├── token-service.ts
+│   └── session.ts
+├── accounts/
+│   ├── docs/              ← accounts' knowledge; links down to ../../auth/docs/
+│   │   └── overview.md
+│   └── account-service.ts
+├── shared/                ← no docs/: only helpers, owns no knowledge
+└── docs/                  ✗ never: one folder describing every module
+```
+
+- **Pick the smallest folder that owns the knowledge** — the module whose code you would change if
+  the fact changed. A submodule gets its own `docs/` (`src/auth/oauth/docs/`) only when it owns
+  knowledge its parent does not; otherwise its facts go in the parent's `src/auth/docs/`.
+- **Asked to document a parent folder** ("document `src/`"): treat it as a list of modules. Run
+  step 1 on each child, then build one `docs/` per qualifying module, one module at a time, each
+  with its own interview. Do not create `src/docs/`.
+- **Knowledge that spans modules** goes in the lowest module that owns it; the others link down to
+  it. What is truly system-wide — layering, how the modules fit together — belongs in the
+  repository's architecture doc, not in a `docs/` under `src/`.
 
 ## 1. Decide whether the folder earns a docs/ folder
 
@@ -70,7 +101,17 @@ when they have content.
 Skip this step if the repository does not build a docs site.
 
 - Add the folder to the site's table of contents or nav (DocFX `toc.yml`, MkDocs `nav`,
-  Docusaurus sidebar, …) with a path relative to that file.
+  Docusaurus sidebar, …) with a path relative to that file — one entry per module, e.g. in a
+  `docs/toc.yml` at the repository root:
+
+  ```yaml
+  - name: Components
+    items:
+      - name: Auth
+        href: ../src/auth/docs/overview.md
+      - name: Accounts
+        href: ../src/accounts/docs/overview.md
+  ```
 - Build the site. The component pages must add no warnings. Common causes:
   - a link to a folder (`[docs/](docs/)`) — most generators need a page;
   - a link from a file mapped in from outside the site's content root into it — it does not
