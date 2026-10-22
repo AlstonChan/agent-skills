@@ -20,13 +20,15 @@ src/
 ├── auth/
 │   ├── docs/              ← auth's knowledge, and only auth's
 │   │   ├── overview.md
-│   │   └── decisions.md
+│   │   ├── flows.md
+│   │   ├── decisions.md
+│   │   └── known-issues.md
 │   ├── token-service.ts
 │   └── session.ts
-├── accounts/
-│   ├── docs/              ← accounts' knowledge; links down to ../../auth/docs/
+├── billing/
+│   ├── docs/              ← billing's knowledge; links down to ../../auth/docs/
 │   │   └── overview.md
-│   └── account-service.ts
+│   └── invoice-service.ts
 ├── shared/                ← no docs/: only helpers, owns no knowledge
 └── docs/                  ✗ never: one folder describing every module
 ```
@@ -101,16 +103,25 @@ when they have content.
 Skip this step if the repository does not build a docs site.
 
 - Add the folder to the site's table of contents or nav (DocFX `toc.yml`, MkDocs `nav`,
-  Docusaurus sidebar, …) with a path relative to that file — one entry per module, e.g. in a
-  `docs/toc.yml` at the repository root:
+  Docusaurus sidebar, …) with a path relative to that file — one entry per module, its overview
+  as the module's page and every other file it has as a child. List only files that exist, and
+  add the entry in the same commit that creates a file. E.g. in a `docs/toc.yml` at the
+  repository root, for the tree above:
 
   ```yaml
   - name: Components
     items:
       - name: Auth
         href: ../src/auth/docs/overview.md
-      - name: Accounts
-        href: ../src/accounts/docs/overview.md
+        items:
+          - name: Flows
+            href: ../src/auth/docs/flows.md
+          - name: Decisions
+            href: ../src/auth/docs/decisions.md
+          - name: Known issues
+            href: ../src/auth/docs/known-issues.md
+      - name: Billing            # overview only, so no children yet
+        href: ../src/billing/docs/overview.md
   ```
 - Build the site. The component pages must add no warnings. Common causes:
   - a link to a folder (`[docs/](docs/)`) — most generators need a page;
