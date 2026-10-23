@@ -59,8 +59,12 @@ consumer folder that only calls a lower layer gets a short overview that links d
   many older commits carry a subject only.
 - Search older commits for removed shapes (`git log -S'<identifier>'`) — a legacy branch in the
   code usually has an even older ancestor that explains it.
-- Architecture docs, the user guide and any agent memory or notes for facts about this folder.
-  Notes are point-in-time: verify every type name against the code.
+- Architecture docs and the user guide for facts about this folder.
+- Agent memory, if the agent has any — memory files, a memory tool or a memory server alike.
+  Recall what it holds about this folder. A memory is a lead, not a fact: it is point-in-time, so
+  verify every type name against the code, and it may record the agent's own guess. A reason the
+  owner stated in an earlier session is a strong lead for the interview; a reason the agent
+  inferred is no better than `Unconfirmed`.
 
 **Do not infer facts about the outside world from identifiers.** A reader named after a machine
 may read a file that a different machine writes; a CSV that looks like a customer format may be a
@@ -76,6 +80,9 @@ Send one consolidated, numbered list. Ask only what the code and history cannot 
 - external rules — machine, upstream, customer, downstream reader;
 - rejected alternatives;
 - will fix, won't fix, or planned removal.
+
+A reason recalled from memory becomes a question to confirm, not a fact to write: "On 2026-03-12
+you said the file is fixed-width because the vendor's reader requires it. Still true?"
 
 Make every question concrete: quote the real path, id or row, and say what the code does with it.
 Abstract questions tend to come back "don't understand". Prefer a yes/no shape, explain any term
@@ -130,12 +137,24 @@ Skip this step if the repository does not build a docs site.
   - an anchor that no longer exists after a heading was renamed — grep `decisions.md#`.
 - Serve the site locally and look at the result.
 
-## 6. Migrate notes
+## 6. Migrate memory
 
-If you keep agent memory or notes about this folder: for each note whose fact is now in the docs,
-delete it, or trim it to what the docs do not hold (cross-component traps, how-tos for other
-folders), keeping the file name when other notes link to it. Update any index and check every
-entry still points at a file.
+Skip this step if the agent keeps no memory. Otherwise the docs are now the source of truth for
+this folder, and memory must stop competing with them. Use whatever the memory offers — editing
+files, a forget or update tool, a server's API — to reach this state:
+
+- **A memory whose fact is now in the docs is no longer recalled in place of them.** Remove it.
+  If the memory cannot remove entries, replace it with one that says the fact moved to the docs
+  path.
+- **A memory that mixes both is cut down** to what the docs do not hold: traps that span
+  components, how-tos for other folders, the user's preferences.
+- **A memory the docs contradict is corrected**, not left beside the docs.
+- **Nothing still points at what was removed.** If the memory has an index, links between entries
+  or a stable name other entries refer to, keep it consistent: keep a name others link to, and
+  check every index entry still resolves.
+
+Memory that records sessions on its own keeps adding facts after this step; the rules in
+[references/rules.md](references/rules.md) move those into the docs as they arrive.
 
 ## 7. Commit
 

@@ -38,3 +38,9 @@ a components section.
   children in the same commit that creates them. Render the site with no new warnings.
 - **Never write a guessed reason as fact.** A reason that neither the code, the history nor the
   owner confirmed is marked `Unconfirmed`.
+- **A folder's `docs/` outranks agent memory.** Memory of any kind — files, a tool, a server — is
+  a lead. When a recalled memory contradicts the docs, follow the docs, say so, and correct the
+  memory.
+- **The docs are where a reason ends up.** When work on a folder that has `docs/` turns up a
+  reason, a decision or a trap, write it into those docs in the same commit, not only into memory.
+  A reason the owner did not state is marked `Unconfirmed`.
