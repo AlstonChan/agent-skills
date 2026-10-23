@@ -11,7 +11,7 @@
     {
       "name": "component-knowledge-base",
       "description": "Build a docs/ knowledge base for one component folder: its why, history, flows and known issues.",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "license": "MIT",
       "source": "./",
       "strict": false,
