@@ -11,8 +11,8 @@ reader is the normal user first, then power users and admins. Developer docs are
 `component-knowledge-base`'s job.
 
 The rules the guide obeys on every change are in [references/rules.md](references/rules.md); this
-skill is the procedure. It needs **Quarto 1.6 or later** and nothing else: no LaTeX, no Node
-([references/setup.md](references/setup.md)). `<skill>` in a command is the folder this skill is
+skill is the procedure. It needs **Quarto 1.10 or later** (tested on 1.10.18) and nothing else: no
+LaTeX, no Node ([references/setup.md](references/setup.md)). `<skill>` in a command is the folder this skill is
 installed in.
 
 ## In every mode

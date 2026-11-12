@@ -254,6 +254,64 @@ export const tests: Record<string, () => Promise<void>> = {
     assertEquals(1, rows(await imagesMd(docs)).length, "row count");
   },
 
+  "a Typst warning refuses the card and changes nothing": async () => {
+    // Typst only warns, and still exits 0, when the card names a font it does not embed. The
+    // script runs from a copy of its own folder whose template names such a font, so the
+    // production template and the script stay as they are.
+    const scripts = `${await newTestDir("card-warning")}/scripts`;
+    await Deno.mkdir(scripts);
+    for (const name of ["placeholder-card.ts", "quarto.ts"]) {
+      await Deno.copyFile(`${skillDir}/scripts/${name}`, `${scripts}/${name}`);
+    }
+    const template = await Deno.readTextFile(`${skillDir}/scripts/placeholder-card.typ`);
+    const broken = template.replace("Libertinus Serif", "No Such Font");
+    assert(broken !== template, "the card template no longer names Libertinus Serif");
+    const copy = `${scripts}/placeholder-card.typ`;
+    const args = (docs: string, why = "new picture") => [
+      "--docs", docs,
+      "--file", "01-main-window.png",
+      "--section", "sec-main-window",
+      "--shows", "The main window.",
+      "--how", "Start the app.",
+      "--why", why,
+      "--capture", "Press the capture hotkey.",
+    ];
+
+    await Deno.writeTextFile(copy, template);
+    const control = await newTestDir("card-warning-control");
+    const ok = await runScript(`${scripts}/placeholder-card.ts`, args(control));
+    assertEquals(0, ok.code, `the copied script draws a card (stderr: ${ok.stderr.trim()})`);
+    await pngSize(`${control}/images/01-main-window.png`);
+
+    await Deno.writeTextFile(copy, broken);
+    const fresh = await newTestDir("card-warning-fresh");
+    const refused = await runScript(`${scripts}/placeholder-card.ts`, args(fresh));
+    assertEquals(1, refused.code, "exit code");
+    const lines = refused.stderr.split(/\r?\n/).filter((line) => line.trim() !== "");
+    assertEquals(1, lines.length, `lines on stderr: ${refused.stderr.trim()}`);
+    assert(
+      lines[0].includes("warning: unknown font family"),
+      `the line names the warning: ${lines[0]}`,
+    );
+    assert(!(await exists(`${fresh}/images`)), "no images folder is made for a refused card");
+
+    const kept = await newTestDir("card-warning-kept");
+    await generateOk(kept, card());
+    const pngBefore = await Deno.readFile(`${kept}/images/01-main-window.png`);
+    const mdBefore = await imagesMd(kept);
+    const again = await runScript(
+      `${scripts}/placeholder-card.ts`,
+      args(kept, "stale: the toolbar moved"),
+    );
+    assertEquals(1, again.code, "exit code when a card already exists");
+    const after = await Deno.readFile(`${kept}/images/01-main-window.png`);
+    assert(
+      after.length === pngBefore.length && after.every((byte, i) => byte === pngBefore[i]),
+      "the existing picture is left as it was",
+    );
+    assertEquals(mdBefore, await imagesMd(kept), "IMAGES.md is left as it was");
+  },
+
   "CRLF is kept": async () => {
     const docs = await newTestDir("card-crlf");
     await Deno.mkdir(`${docs}/images`);

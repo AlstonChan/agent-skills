@@ -7,6 +7,11 @@
 // Writes <dir>/images/<name.png> and upserts that picture's row in <dir>/images/IMAGES.md.
 // --capture defaults to the "Capture it:" line of IMAGES.md; a new IMAGES.md needs it.
 // Exits 0 on success; on failure exits 1 with one message line on stderr.
+//
+// A warning from Typst counts as a failure. The usual one is an unknown font: Typst then falls
+// back to another face and still exits 0, so cards would quietly stop matching each other. The
+// card is drawn in a scratch folder and copied out only when Typst printed no warning, so a
+// refused run leaves the image and IMAGES.md exactly as they were.
 
 import { quartoCommand } from "./quarto.ts";
 
@@ -14,6 +19,7 @@ const NAME = "placeholder-card";
 const REQUIRED = ["docs", "file", "section", "shows", "how", "why"] as const;
 const OPTIONAL = ["capture"] as const;
 const PATHS: readonly string[] = ["docs", "file"];
+const ANSI = /\u001b\[[0-9;]*[A-Za-z]/g;
 
 const TABLE_HEADER = "| File | Section | Shows | How to get there | Status |";
 const TABLE_RULE = "| :--- | :--- | :--- | :--- | :--- |";
@@ -60,8 +66,14 @@ async function readIfExists(path: string): Promise<string | undefined> {
   }
 }
 
+/** The first line of Typst's output that opens a warning, or undefined when it printed none. */
+function typstWarning(stderr: string): string | undefined {
+  return stderr.replace(ANSI, "").split(/\r?\n/).find((line) => /^\s*warning\b/i.test(line))
+    ?.trim();
+}
+
 async function drawCard(
-  output: string,
+  imagesDir: string,
   card: { file: string; shows: string; how: string; capture: string },
 ): Promise<void> {
   const work = await Deno.makeTempDir({ prefix: `${NAME}-` });
@@ -74,7 +86,7 @@ async function drawCard(
     try {
       result = await new Deno.Command(quarto, {
         args: [
-          "typst", "compile", `${work}/card.typ`, output,
+          "typst", "compile", `${work}/card.typ`, `${work}/card.png`,
           "--root", work,
           "--input", "data=card.json",
           "--ignore-system-fonts",
@@ -86,11 +98,16 @@ async function drawCard(
     } catch (error) {
       throw new Error(`cannot start Quarto (${quarto}): ${(error as Error).message}`);
     }
+    const stderr = new TextDecoder().decode(result.stderr);
     if (result.code !== 0) {
-      const reason = new TextDecoder().decode(result.stderr).split(/\r?\n/)
-        .find((line) => line.trim() !== "");
+      const reason = stderr.replace(ANSI, "").split(/\r?\n/).find((line) => line.trim() !== "");
       throw new Error(`Typst failed: ${reason ?? `exit code ${result.code}`}`);
     }
+    const warning = typstWarning(stderr);
+    if (warning) throw new Error(`Typst warned, so no card was written: ${warning}`);
+
+    await Deno.mkdir(imagesDir, { recursive: true });
+    await Deno.copyFile(`${work}/card.png`, `${imagesDir}/${card.file}`);
   } finally {
     await Deno.remove(work, { recursive: true });
   }
@@ -152,8 +169,7 @@ async function main(argv: string[]): Promise<void> {
     );
   }
 
-  await Deno.mkdir(imagesDir, { recursive: true });
-  await drawCard(`${imagesDir}/${args.file}`, {
+  await drawCard(imagesDir, {
     file: args.file,
     shows: args.shows,
     how: args.how,

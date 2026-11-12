@@ -273,7 +273,8 @@ async function checkRender(docs: string, add: Add): Promise<void> {
   }
 }
 
-async function main(argv: string[]): Promise<void> {
+/** Runs the checks, prints the problems, and returns the process exit code. */
+async function main(argv: string[]): Promise<number> {
   const options = parseArgs(argv);
   const problems: Problem[] = [];
   const add: Add = (level, text) => problems.push({ level, text: oneLine(text) });
@@ -294,13 +295,13 @@ async function main(argv: string[]): Promise<void> {
   }
 
   for (const problem of problems) console.log(`${problem.level}: ${problem.text}`);
-  if (problems.some((problem) => problem.level === "ERROR")) Deno.exitCode = 1;
+  return problems.some((problem) => problem.level === "ERROR") ? 1 : 0;
 }
 
 try {
-  await main(Deno.args);
+  Deno.exit(await main(Deno.args));
 } catch (error) {
   const reason = oneLine(error instanceof Error ? error.message : String(error));
   console.log(`ERROR: ${NAME}: ${reason}`);
-  Deno.exitCode = 1;
+  Deno.exit(1);
 }

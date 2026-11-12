@@ -28,7 +28,7 @@ npx skills add AlstonChan/agent-skills --skill wpf-design-system -a claude-code 
 npx skills add AlstonChan/agent-skills --skill user-guide -a claude-code -g
 ```
 
-The `user-guide` skill needs [Quarto](https://quarto.org) 1.6 or later installed, since its scripts run with `quarto run`.
+The `user-guide` skill needs [Quarto](https://quarto.org) 1.10 or later installed (tested on 1.10.18), since its scripts run with `quarto run`.
 
 Skills install into the current project by default; `-g` installs them for every project and
 `-a` picks the agent instead of being asked.

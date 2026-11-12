@@ -8,8 +8,8 @@ as `quarto run <skill>/scripts/check-guide.ts …`.
 
 ## What it needs
 
-- **Quarto 1.6 or later** (the brand logo needs it); tested on 1.10.18. Quarto ships Typst
-  and the Deno runtime the scripts run on, so nothing else is installed: no LaTeX, no Node.
+- **Quarto 1.10 or later**, tested on 1.10.18. Quarto ships Typst and the Deno runtime the
+  scripts run on, so nothing else is installed: no LaTeX, no Node.
 - **The guide lives in `docs/`.** The placeholder card prints `docs/images` as the place to save a
   capture, and the rules and examples assume that folder.
 
@@ -183,7 +183,7 @@ A CI runner has no skill installed, so CI runs a copy of the check:
 - **Copy `<skill>/scripts/check-guide.ts` and `<skill>/scripts/quarto.ts` into one folder** in the
   repository, `build/user-guide/`. They must sit side by side: `check-guide.ts` imports
   `./quarto.ts`.
-- **CI calls the copy**, on a runner with Quarto 1.6 or later:
+- **CI calls the copy**, on a runner with Quarto 1.10 or later:
 
   ```bash
   quarto run build/user-guide/check-guide.ts --docs docs
