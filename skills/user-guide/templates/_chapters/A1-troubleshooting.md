@@ -1,6 +1,6 @@
 # Appendix: Troubleshooting {#sec-troubleshooting}
 
-<!-- Template: one entry for each trouble a user can see, starting from what they see. Replace the sample entries, then delete this line. -->
+<!-- Template: the troubleshooting appendix: one entry for each trouble a user can see, starting from what they see. Everything below, including every label, default and message, is sample text, not fact: rewrite the whole chapter from the app's code, then delete this line. -->
 
 Each entry below starts from what you see on screen, then says what to do. Find yours in the
 table, or scroll to the entry. A message on screen may also send you here by name

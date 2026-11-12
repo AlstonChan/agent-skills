@@ -1,6 +1,6 @@
 # [[AREA_NAME]] {#sec-[[AREA_ID]]}
 
-<!-- Template: one chapter like this for each main area or workflow of the app. Replace the sample text, then delete this line. -->
+<!-- Template: one chapter like this for each main area or workflow of the app; copy the file for each one. Everything below, including every label, default and message, is sample text, not fact: rewrite the whole chapter from the app's code, then delete this line. -->
 
 The [[AREA_NAME]] area is where you find, open and organise your work in [[APP_NAME]]. This
 chapter shows what the area looks like, what each control does, and how to carry out its common

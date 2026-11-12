@@ -6,6 +6,8 @@ date: today
 date-format: "D MMMM YYYY"
 ---
 
+<!-- Template: the spine of the guide. The chapter list below is the starter set, not the guide's own: add, remove and rename the includes to match the chapters the guide really has, then delete this line. -->
+
 <!--
   This file is the spine of the guide. Chapters live in _chapters/ and are
   pulled in below; the leading underscore keeps Quarto from also rendering

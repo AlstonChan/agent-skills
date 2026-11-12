@@ -1,6 +1,6 @@
 # Getting Started {#sec-getting-started}
 
-<!-- Template: replace the sample text with this app's own steps and labels, then delete this line. -->
+<!-- Template: the first-use chapter: install, first run or sign-in, the main window and a first task. Everything below, including every label, default and message, is sample text, not fact: rewrite the whole chapter from the app's code, then delete this line. -->
 
 This chapter takes you from opening [[APP_NAME]] to finishing your first task. Read it once; the
 chapters after it describe each part of the program in detail, and the appendices at the back

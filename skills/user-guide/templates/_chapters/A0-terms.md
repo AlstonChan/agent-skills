@@ -1,6 +1,6 @@
 # Appendix: Terms {#sec-terms}
 
-<!-- Template: list the words the guide uses that mean something specific in this app, and where the app shows each one. Replace the sample rows, then delete this line. -->
+<!-- Template: the terms appendix: each word that means something specific in this app, and where the app shows it. Everything below, including every label, default and message, is sample text, not fact: rewrite the whole chapter from the app's code, then delete this line. -->
 
 Some words in [[APP_NAME]] mean something more specific than they do in everyday speech. This
 appendix defines each one the way the rest of the guide uses it. Use it when a name on screen does

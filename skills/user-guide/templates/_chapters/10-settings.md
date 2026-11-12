@@ -1,6 +1,6 @@
 # Settings {#sec-settings}
 
-<!-- Template: a reference chapter for the settings window. List every setting the app has, with its default. Replace the sample text, then delete this line. -->
+<!-- Template: the settings reference: every setting the app has, with its default. Everything below, including every label, default and message, is sample text, not fact: rewrite the whole chapter from the app's code, then delete this line. -->
 
 The settings decide how [[APP_NAME]] looks and behaves on this computer. Change them when the
 defaults do not suit the way you work; nothing here alters your data.

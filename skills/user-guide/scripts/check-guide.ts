@@ -6,8 +6,9 @@
 // Prints one line per problem, "ERROR: <text>" or "WARN: <text>", after collecting all of them,
 // and exits 1 if any line is an ERROR, else 0. Prints nothing when the guide is clean.
 //
-// --draft turns pictures still marked placeholder from errors into warnings, for a guide that is
-// not being released yet. --no-render skips `quarto render`, which is the slow check.
+// --draft turns pictures still marked placeholder and template markers still in the text from
+// errors into warnings, for a guide that is not being released yet. --no-render skips
+// `quarto render`, which is the slow check.
 //
 // Checks:
 //   - user-guide.qmd exists (when it does not, that is the only line);
@@ -16,6 +17,8 @@
 //   - every picture file has a row, and every row has a file;
 //   - every pipe table in a chapter is followed by a ": Caption {#tbl-id}" line;
 //   - no unfilled [[TOKEN]] is left in the spine or a chapter;
+//   - no `<!-- Template:` marker is left in the spine or a chapter: the starter text under it is
+//     sample prose that nobody has confirmed;
 //   - `quarto render` exits 0 and prints no warning.
 
 import { quartoCommand } from "./quarto.ts";
@@ -24,7 +27,8 @@ const NAME = "check-guide";
 const SPINE = "user-guide.qmd";
 const IMAGE_FILE = /\.(png|jpe?g|gif|svg|webp)$/i;
 const TOKEN = /\[\[[^\[\]\r\n]+\]\]/g;
-const RENDER_WARNING = /\bwarn(ing)?\b/i;
+const TEMPLATE_MARKER = "<!-- Template:";
+const RENDER_WARNING =/\bwarn(ing)?\b/i;
 const ANSI = /\u001b\[[0-9;]*[A-Za-z]/g;
 
 interface Problem {
@@ -148,11 +152,24 @@ function uncaptionedTables(lines: string[]): number[] {
   return found;
 }
 
-function checkText(file: string, text: string, isChapter: boolean, add: Add): void {
+function checkText(
+  file: string,
+  text: string,
+  isChapter: boolean,
+  draft: boolean,
+  add: Add,
+): void {
   const lines = linesOf(text);
   lines.forEach((line, index) => {
     for (const token of line.match(TOKEN) ?? []) {
       add("ERROR", `${file}:${index + 1}: unfilled template token ${token}`);
+    }
+    if (line.includes(TEMPLATE_MARKER)) {
+      add(
+        draft ? "WARN" : "ERROR",
+        `${file}:${index + 1}: template marker is still there, so the sample text under it ` +
+          "may not be confirmed; rewrite it from the code, then delete the marker line",
+      );
     }
   });
   if (!isChapter) return;
@@ -267,10 +284,10 @@ async function main(argv: string[]): Promise<void> {
   } else {
     await checkImages(options.docs, options.draft, add);
 
-    checkText(SPINE, spine, false, add);
+    checkText(SPINE, spine, false, options.draft, add);
     for (const name of await namesIn(`${options.docs}/_chapters`, (n) => n.endsWith(".md"))) {
       const text = await Deno.readTextFile(`${options.docs}/_chapters/${name}`);
-      checkText(`_chapters/${name}`, text, true, add);
+      checkText(`_chapters/${name}`, text, true, options.draft, add);
     }
 
     if (options.render) await checkRender(options.docs, add);

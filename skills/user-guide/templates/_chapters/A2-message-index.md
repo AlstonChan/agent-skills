@@ -1,6 +1,6 @@
 # Appendix: Message Index {#sec-message-index}
 
-<!-- Template: every titled dialog and every refusal, warning or error a user can read long enough to act on, quoted exactly as the app shows it. Replace the sample rows, then delete this line. -->
+<!-- Template: the message index: every titled dialog and every refusal, warning or error a user can read long enough to act on, quoted exactly as the app shows it. Everything below, including every label, default and message, is sample text, not fact: rewrite the whole chapter from the app's code, then delete this line. -->
 
 Find the message you are looking at by the title in its title bar, and this index tells you what
 it means and what to do. Brief notices that close on their own are not listed.

@@ -14,6 +14,9 @@ const TOKENS: Record<string, string> = {
 
 const TEXT_FILE = /\.(md|qmd|ya?ml)$/;
 
+/** The line each template starts with while its text is still sample prose. */
+const MARKER = "<!-- Template:";
+
 /** A UI stack no skill file may name: the skill and its templates fit any desktop app. */
 const PRODUCT_NAMES = /wpf/i;
 
@@ -55,6 +58,12 @@ async function referencedImages(docs: string): Promise<Map<string, string>> {
     }
   }
   return found;
+}
+
+/** The templates that carry a sample-text marker: the spine and every chapter. */
+async function markedTemplates(): Promise<string[]> {
+  const chapters = (await filesUnder(`${templates}/_chapters`)).map((name) => `_chapters/${name}`);
+  return ["user-guide.qmd", ...chapters];
 }
 
 let built: Promise<string> | undefined;
@@ -106,20 +115,54 @@ export const tests: Record<string, () => Promise<void>> = {
     assertEquals(0, result.code, `exit code (stdout: ${result.stdout.trim()})`);
     assertEquals([], result.errors, "ERROR lines");
     for (const line of result.warnings) {
-      assert(line.includes("placeholder"), `only placeholder warnings are expected: ${line}`);
+      assert(
+        line.includes("placeholder") || line.includes("template marker"),
+        `only placeholder and marker warnings are expected: ${line}`,
+      );
     }
-    assertEquals(3, result.warnings.length, "one placeholder warning per card");
+    assertEquals(
+      3,
+      result.warnings.filter((line) => line.includes("placeholder")).length,
+      "one placeholder warning per card",
+    );
+    assertEquals(
+      (await markedTemplates()).length,
+      result.warnings.filter((line) => line.includes("template marker")).length,
+      "one marker warning per template",
+    );
     const pdf = await Deno.stat(`${docs}/_output/user-guide.pdf`);
     assert(pdf.isFile && pdf.size > 0, "_output/user-guide.pdf is a non-empty file");
   },
 
-  "templates fail a release check while cards remain": async () => {
+  "templates fail a release check while cards and markers remain": async () => {
     const docs = await filledGuide();
     const result = await check(docs, "--no-render");
     assertEquals(1, result.code, `exit code (stdout: ${result.stdout.trim()})`);
-    assertEquals(3, result.errors.length, "one error per placeholder card");
-    for (const line of result.errors) {
-      assert(line.includes("still a placeholder"), `only placeholder errors are expected: ${line}`);
+
+    const markers = result.errors.filter((line) => line.includes("template marker"));
+    const cards = result.errors.filter((line) => line.includes("still a placeholder"));
+    assertEquals(3, cards.length, "one error per placeholder card");
+    const files = await markedTemplates();
+    assertEquals(files.length, markers.length, "one error per template marker");
+    for (const file of files) {
+      assert(
+        markers.some((line) => line.startsWith(`ERROR: ${file}:`)),
+        `no marker error names ${file}: ${markers.join(" / ")}`,
+      );
+    }
+    assertEquals(cards.length + markers.length, result.errors.length, "no other errors");
+  },
+
+  "every template carries exactly one sample-text marker": async () => {
+    for (const file of await markedTemplates()) {
+      const text = await Deno.readTextFile(`${templates}/${file}`);
+      const lines = text.split(/\r?\n/).filter((line) => line.includes(MARKER));
+      assertEquals(1, lines.length, `lines holding ${MARKER} in ${file}`);
+      assert(!lines[0].includes("[["), `${file}: the marker line must not hold a token`);
+      assert(
+        lines[0].trimEnd().endsWith("-->") && lines[0].trimStart().startsWith(MARKER),
+        `${file}: the marker is a whole one-line comment: ${lines[0]}`,
+      );
     }
   },
 
@@ -141,11 +184,20 @@ export const tests: Record<string, () => Promise<void>> = {
   },
 
   "skill files name no product": async () => {
+    const strict = new TextDecoder("utf-8", { fatal: true });
+    let scanned = 0;
     for (const file of await filesUnder(skillDir)) {
-      if (!/\.(md|qmd|ya?ml|ts|typ)$/.test(file)) continue;
-      const text = await Deno.readTextFile(`${skillDir}/${file}`);
+      let text: string;
+      try {
+        text = strict.decode(await Deno.readFile(`${skillDir}/${file}`));
+      } catch (error) {
+        if (error instanceof TypeError) continue;
+        throw error;
+      }
+      scanned++;
       const hit = PRODUCT_NAMES.exec(text);
       assert(hit === null, `skills/user-guide/${file} names a product: ${hit?.[0]}`);
     }
+    assert(scanned > 0, "no file under skills/user-guide/ was scanned");
   },
 };

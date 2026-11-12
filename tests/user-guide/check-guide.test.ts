@@ -301,6 +301,47 @@ export const tests: Record<string, () => Promise<void>> = {
     assert(inSpine.errors[0].includes("user-guide.qmd"), `names the spine: ${inSpine.errors[0]}`);
   },
 
+  "template marker fails, draft warns": async () => {
+    const marker =
+      "<!-- Template: sample text below, rewrite it from the code, then delete this line. -->";
+
+    const docs = await buildGuide("check-marker-chapter");
+    await appendTo(`${docs}/_chapters/01-getting-started.md`, `\n${marker}\n`);
+    const strict = await check(docs, "--no-render");
+    assertEquals(1, strict.code, `exit code (${describe(strict)})`);
+    assertEquals(1, strict.errors.length, `ERROR lines: ${strict.errors.join(" / ")}`);
+    assert(
+      strict.errors[0].includes("_chapters/01-getting-started.md:"),
+      `names the chapter and line: ${strict.errors[0]}`,
+    );
+    assert(strict.errors[0].includes("template marker"), `says what it is: ${strict.errors[0]}`);
+
+    const draft = await check(docs, "--draft", "--no-render");
+    assertEquals(0, draft.code, `exit code with --draft (${describe(draft)})`);
+    assertEquals([], draft.errors, "ERROR lines with --draft");
+    assertEquals(1, draft.warnings.length, `WARN lines: ${draft.warnings.join(" / ")}`);
+    assert(
+      draft.warnings[0].includes("01-getting-started.md"),
+      `names the chapter: ${draft.warnings[0]}`,
+    );
+
+    const spineDocs = await buildGuide("check-marker-spine");
+    await appendTo(`${spineDocs}/user-guide.qmd`, `\n${marker}\n`);
+    const inSpine = await check(spineDocs, "--no-render");
+    assertEquals(1, inSpine.code, `exit code (${describe(inSpine)})`);
+    assertEquals(1, inSpine.errors.length, `ERROR lines: ${inSpine.errors.join(" / ")}`);
+    assert(inSpine.errors[0].includes("user-guide.qmd:"), `names the spine: ${inSpine.errors[0]}`);
+
+    const ordinary = await buildGuide("check-marker-ordinary-comment");
+    await appendTo(
+      `${ordinary}/_chapters/01-getting-started.md`,
+      "\n<!-- An ordinary comment about a template word. -->\n",
+    );
+    const clean = await check(ordinary, "--no-render");
+    assertEquals(0, clean.code, `an ordinary comment is not a marker (${describe(clean)})`);
+    assertEquals([], clean.errors, "ERROR lines for an ordinary comment");
+  },
+
   "broken cross-reference fails": async () => {
     const docs = await buildGuide("check-xref");
     await appendTo(`${docs}/_chapters/01-getting-started.md`, "\nSee @sec-nowhere.\n");
