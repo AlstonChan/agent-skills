@@ -1,4 +1,4 @@
-import { assert, assertEquals, newTestDir, runScript, skillDir } from "./helpers.ts";
+import { assert, assertEquals, newTestDir, runQuarto, runScript, skillDir } from "./helpers.ts";
 
 const templates = `${skillDir}/templates`;
 const cardScript = `${skillDir}/scripts/placeholder-card.ts`;
@@ -129,6 +129,31 @@ export const tests: Record<string, () => Promise<void>> = {
       (await markedTemplates()).length,
       result.warnings.filter((line) => line.includes("template marker")).length,
       "one marker warning per template",
+    );
+    const pdf = await Deno.stat(`${docs}/_output/user-guide.pdf`);
+    assert(pdf.isFile && pdf.size > 0, "_output/user-guide.pdf is a non-empty file");
+  },
+
+  "a version stamp reaches the typeset guide and the List of Tables is built": async () => {
+    const docs = await filledGuide();
+    const result = await runQuarto([
+      "render",
+      `${docs}/user-guide.qmd`,
+      "-M",
+      "subtitle=Version 9.9.9",
+    ]);
+    assertEquals(0, result.code, `exit code (stderr: ${result.stderr.trim()})`);
+    const typ = await Deno.readTextFile(`${docs}/user-guide.typ`);
+    assert(typ.includes("subtitle: [Version 9.9.9]"), "the title page carries the stamp");
+    assert(
+      typ.includes("Sample Viewer User Guide --- Version 9.9.9"),
+      "the running header carries the stamp",
+    );
+    assert(!typ.includes("Unversioned"), "the default subtitle is replaced, not shown as well");
+    assert(
+      /#outline\(\s*title: \[List of Tables\],\s*target: figure\.where\(kind: "quarto-float-tbl"\),?\s*\)/
+        .test(typ),
+      "the List of Tables outline is in the typeset guide",
     );
     const pdf = await Deno.stat(`${docs}/_output/user-guide.pdf`);
     assert(pdf.isFile && pdf.size > 0, "_output/user-guide.pdf is a non-empty file");

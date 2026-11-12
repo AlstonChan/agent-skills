@@ -142,9 +142,13 @@ quarto render docs/user-guide.qmd -M subtitle="Version 2.3.0"
 The PDF is `docs/_output/user-guide.pdf`. The check renders without a version; render again with
 the stamp after it passes.
 
-- **A build that is not a release stamps a version nobody can take for one**: the nearest tag and
-  how far past it the build is (`Version 2.3.0+14`, from `git describe --tags`), never the bare
-  tag of the last release.
+- **A build that is not a release stamps a version nobody can take for one**: the nearest tag, how
+  far past it the build is, the commit, and the word draft, never the bare tag of the last release.
+  `git describe --tags` prints `v2.3.0-14-ga1b2c3d` for such a build, which reads
+  `Version 2.3.0 +14 (a1b2c3d, draft)` on the page. A build exactly on the tag prints `v2.3.0` and
+  reads `Version 2.3.0`.
+- **A build with no tag to describe** (`git describe --tags` fails) is rendered without `-M`, so it
+  reads `Unversioned`.
 - **When the app ships the PDF** (a Help command opens it), the release renders the guide before it
   packages the app, so each release carries the guide that describes it. The PDF is build output,
   never committed.
@@ -166,17 +170,22 @@ The PDF is the guide. To publish the same chapters as a page as well, uncomment 
 in `docs/_quarto.yml`; the render then also writes `docs/_output/user-guide.html`. Drawings made
 in Typst appear in the PDF only ([writing.md](writing.md)).
 
-## 10. Offer the release check
+## 10. Offer the release check and the version stamp
 
-Offer to call the check from the project's release script or CI; edit them only on a yes.
+Offer to do two things in the project's release script or CI, and edit either only on a yes: call
+the check, and render the PDF with the version stamp ([step 7](#7-version-stamp)) once the check
+passes.
 
 ```bash
 quarto run <skill>/scripts/check-guide.ts --docs docs
+quarto render docs/user-guide.qmd -M subtitle="Version 2.3.0"
 ```
 
-It prints one `ERROR:` or `WARN:` line per problem and exits 1 on any `ERROR:`, so the release
-stops on a card, a template marker or a render warning. `WARN:` lines appear only with `--draft`
-and never fail it; a release check never passes `--draft`.
+The check prints one `ERROR:` or `WARN:` line per problem and exits 1 on any `ERROR:`, so the
+release stops on a card, a template marker or a render warning. `WARN:` lines appear only with
+`--draft` and never fail it; a release check never passes `--draft`. The release's own version
+fills the stamp: the tag it builds, or the `git describe --tags` form for a build that is not a
+release. CI needs the tags for that, so its checkout fetches the full history.
 
 A CI runner has no skill installed, so CI runs a copy of the check:
 

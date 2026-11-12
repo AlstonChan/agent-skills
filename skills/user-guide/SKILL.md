@@ -81,8 +81,10 @@ exists and a change alters what a user sees; **adopt** when a Quarto guide exist
    Either it passes, or the report lists exactly what still blocks a release: each card it fails
    on, with its steps, and each open question that keeps a fact out of the guide. No template
    marker is left by now.
-8. **Report and offer**: the waiting cards and open questions; to call the check from the project's
-   release script or CI (setup.md, step 10), edited only on a yes; and the rules (below).
+8. **Report and offer**: the waiting cards and open questions; to call the check and to render
+   with the version stamp (`quarto render docs/user-guide.qmd -M subtitle="Version x.y.z"`) in the
+   project's release script or CI (setup.md, steps 7 and 10), editing either only on a yes; and the
+   rules (below).
 
 ## Maintain after a change
 

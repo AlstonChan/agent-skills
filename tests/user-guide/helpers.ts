@@ -51,13 +51,12 @@ export async function newTestDir(name: string): Promise<string> {
   return await Deno.makeTempDir({ dir: root, prefix: `${name.replace(/[^\w-]+/g, "-")}-` });
 }
 
-/** Runs `quarto run <script> ...args` and collects its exit code and output. */
-export async function runScript(
-  script: string,
+/** Runs `quarto <...args>` and collects its exit code and output. */
+export async function runQuarto(
   args: string[],
 ): Promise<{ code: number; stdout: string; stderr: string }> {
   const out = await new Deno.Command(quartoCommand(), {
-    args: ["run", script, ...args],
+    args,
     stdout: "piped",
     stderr: "piped",
   }).output();
@@ -67,6 +66,14 @@ export async function runScript(
     stdout: decoder.decode(out.stdout),
     stderr: decoder.decode(out.stderr),
   };
+}
+
+/** Runs `quarto run <script> ...args` and collects its exit code and output. */
+export function runScript(
+  script: string,
+  args: string[],
+): Promise<{ code: number; stdout: string; stderr: string }> {
+  return runQuarto(["run", script, ...args]);
 }
 
 /** Reads the dimensions from a PNG's IHDR chunk (bytes 16-23, big-endian). */
