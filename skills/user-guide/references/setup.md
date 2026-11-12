@@ -8,7 +8,7 @@ as `quarto run <skill>/scripts/check-guide.ts …`.
 
 ## What it needs
 
-- **Quarto 1.4 or later** (the first with `quarto typst`); tested on 1.10.18. Quarto ships Typst
+- **Quarto 1.6 or later** (the brand logo needs it); tested on 1.10.18. Quarto ships Typst
   and the Deno runtime the scripts run on, so nothing else is installed: no LaTeX, no Node.
 - **The guide lives in `docs/`.** The placeholder card prints `docs/images` as the place to save a
   capture, and the rules and examples assume that folder.
@@ -52,10 +52,12 @@ Replace every token in every copied file:
   the header in the first render either way.
 - **`[[CAPTURE_IT]]` says how to take the picture**, not where to put it: the card already says to
   save it under its file name in `docs/images` and mark its row captured. Use the app's own capture
-  feature if it has one, else the OS tool:
+  feature if it has one, else the tool of the OS the users run. The token is replaced by one line
+  of text, after the `Capture it:` that is already there. Examples of that text:
 
   ```text
-  Capture it: Press Windows+Shift+S, drag over the part of the window the card describes, then paste the clip into Paint and save it as PNG.
+  Windows: Press Windows+Shift+S, drag over the part of the window the card describes, then paste the clip into Paint and save it as PNG.
+  macOS:   Press Shift+Command+4, drag over the part of the window the card describes; the PNG lands on the desktop.
   ```
 
   The placeholder card script refuses to run while this line still holds the token, unless it is
@@ -72,8 +74,10 @@ The spine's includes are hard-coded, one `{{< include >}}` per chapter with a
 - **Rename `02-area.md`** to the area's id, and its include line with it:
   `02-area.md` → `02-library.md`.
 - **Add an area**: copy `<skill>/templates/_chapters/02-area.md` to the next free number, fill its
-  `[[AREA_NAME]]` and `[[AREA_ID]]`, and add its include where the chapter belongs, with a page
-  break before it. Sample Viewer's Viewer area is `03-viewer.md` (`Viewer`, `viewer`):
+  `[[AREA_NAME]]` and `[[AREA_ID]]`, and change the `02-` of its overview picture to the new
+  number, in the figure and in that picture's `IMAGES.md` row: `images/02-viewer-overview.png`
+  becomes `images/03-viewer-overview.png`. Then add its include where the chapter belongs, with a
+  page break before it. Sample Viewer's Viewer area is `03-viewer.md` (`Viewer`, `viewer`):
 
   ```text
   {{< include _chapters/02-library.md >}}
@@ -87,8 +91,10 @@ The spine's includes are hard-coded, one `{{< include >}}` per chapter with a
   templates point at `@sec-settings`, so dropping `10-settings.md` means:
 
   ```bash
-  git grep -n "@sec-settings" docs
+  grep -rn "@sec-settings" docs
   ```
+
+  Plain `grep`, because the copied files are not in git yet and `git grep` skips them.
 
   A reference left behind is a render warning, which fails the check.
 - **Then delete the spine's `<!-- Template:` line.**
@@ -156,10 +162,23 @@ Offer to call the check from the project's release script or CI; edit them only 
 quarto run <skill>/scripts/check-guide.ts --docs docs
 ```
 
-It prints one `ERROR:` or `WARN:` line per problem and exits 1 on any error, so the release stops
-on a card or a warning. A CI runner has no skill installed: copy `check-guide.ts` and `quarto.ts`,
-which it imports, into the repository (`build/user-guide/`) and call that copy. The runner needs
-Quarto.
+It prints one `ERROR:` or `WARN:` line per problem and exits 1 on any `ERROR:`, so the release
+stops on a card, a template marker or a render warning. `WARN:` lines appear only with `--draft`
+and never fail it; a release check never passes `--draft`.
+
+A CI runner has no skill installed, so CI runs a copy of the check:
+
+- **Copy `<skill>/scripts/check-guide.ts` and `<skill>/scripts/quarto.ts` into one folder** in the
+  repository, `build/user-guide/`. They must sit side by side: `check-guide.ts` imports
+  `./quarto.ts`.
+- **CI calls the copy**, on a runner with Quarto 1.6 or later:
+
+  ```bash
+  quarto run build/user-guide/check-guide.ts --docs docs
+  ```
+- **Never edit the copy.** Re-copy both files whenever the skill's scripts change.
+- **Only the check is copied.** The card script also needs its `placeholder-card.typ` and runs from
+  the installed skill, never from CI.
 
 ## 11. In-app links, only if the project wants them
 

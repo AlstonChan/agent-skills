@@ -20,7 +20,7 @@ harness that draws a window, say). Before any of it:
 - **Crop to the part the section is about**: the dialog, the panel, the toolbar. The whole window
   only for an overview. Keep a dialog's title bar; the message index finds a dialog by its title.
 - **Name it `<chapter number>-<what>.png`**, lowercase words joined by `-`, saved in
-  `docs/images/`. The chapter number is the chapter file's prefix:
+  `docs/images/`. The chapter number is the chapter file's prefix, not the number the PDF prints:
 
   ```text
   01-main-window.png          01-getting-started.md

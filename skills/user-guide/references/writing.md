@@ -14,8 +14,10 @@ then power users and admins. The guide must work read front to back and looked u
 | `A1-troubleshooting.md` | Troubleshooting, by what the user sees | Always |
 | `A2-message-index.md` | Every message worth looking up, and what to do | Always |
 
-- **A file's number is its chapter number; only the spine sets the order** through its includes
-  ([setup.md](setup.md) adds, renames and drops them).
+- **A file's number prefix places it in the scheme; only the spine sets the order** through its
+  includes ([setup.md](setup.md) adds, renames and drops them). The printed chapter number follows
+  the spine order, not the prefix: Sample Viewer's `10-settings.md` prints as chapter 4, after
+  `01`, `02` and `03`. Picture names use the prefix (`10-settings.png`).
 - **A section two areas share lives once**, in the chapter that owns it; the other links to it.
 
 Sample Viewer's chapters:

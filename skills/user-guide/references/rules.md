@@ -1,9 +1,12 @@
 # User guide rules
 
 The rules an end-user guide obeys on every change, not only when the skill runs. Copy the section
-below into the repository's `CLAUDE.md` or `AGENTS.md`. In its commands, `<skill>` is the folder
-the `user-guide` skill is installed in; if the project keeps its own copy of the scripts (see
-[setup.md](setup.md)), write that path instead when pasting.
+below into the repository's `CLAUDE.md` or `AGENTS.md`, so it stands on its own there.
+
+When pasting, replace every `<skill>` in it with the real path of the folder the `user-guide`
+skill is installed in, so an agent that never loaded the skill can run the commands. Both commands
+run from the installed skill; a project copy of `check-guide.ts` for CI (see
+[setup.md](setup.md)) does not change them.
 
 ## User guide
 
@@ -26,8 +29,8 @@ file per chapter in `docs/_chapters/`, every picture in `docs/images/`.
   as one numbered item: the question, where it came from, what will be written for each answer.
   When the answer comes, write it into its chapter and delete the item.
 - **Pictures by default**: one per screen or dialog a user meets, named
-  `<chapter number>-<what>.png` in `docs/images/` (`02-library-search.png` for the Library
-  chapter, `02-library.md`).
+  `<chapter number>-<what>.png` in `docs/images/`, where the chapter number is the chapter file's
+  prefix (`02-library-search.png` for the Library chapter, `02-library.md`).
 - **`docs/images/IMAGES.md` lists every picture**, one row each, with status `captured` or
   `placeholder: <why>`. A picture with no row, or a row with no picture, fails the check:
 
@@ -40,8 +43,8 @@ file per chapter in `docs/_chapters/`, every picture in `docs/images/`.
 
   ```bash
   quarto run <skill>/scripts/placeholder-card.ts --docs docs --file 02-library-search.png \
-    --section sec-library-search --shows "The Library list narrowed by Search" \
-    --how "Open Sample Viewer, choose Library, type tile in Search" \
+    --section sec-library-search --shows "The Library list narrowed by Filter" \
+    --how "Open Sample Viewer, choose Library, type tile in Filter" \
     --why "stale: Search was renamed Filter"
   ```
 
