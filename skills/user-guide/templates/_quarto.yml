@@ -1,0 +1,79 @@
+project:
+  type: default
+  output-dir: _output
+  # Only the spine is rendered. Without this list Quarto also renders every .md
+  # beside it (OPEN-QUESTIONS.md, images/IMAGES.md) as a document of its own.
+  render:
+    - user-guide.qmd
+
+format:
+  typst:
+    papersize: a4
+    margin:
+      x: 2cm
+      y: 2.2cm
+    fontsize: 10pt
+    toc: true
+    toc-title: Contents
+    toc-depth: 2
+
+    # No `lot: true` here on purpose. Quarto's format reference lists it, but the
+    # Typst writer ignores it - setting it emits no second outline at all. The
+    # List of Tables is built explicitly in user-guide.qmd instead.
+
+    number-sections: true
+    section-numbering: "1.1"
+
+    # Cross-references are real links, but the default Typst template draws them
+    # in body colour, so nothing tells a reader on screen that they are
+    # clickable. Watch which key does what - it is not what the names suggest:
+    # `@sec-*`/`@fig-*`/`@tbl-*` compile to Typst `ref` elements, and the template
+    # colours `ref` with *citecolor*. There are no citations in this guide, so
+    # citecolor is purely the cross-reference colour here, and it is the only
+    # one of the three doing visible work today.
+    #
+    # linkcolor/filecolor are kept for the first external URL someone adds (a
+    # support link in the troubleshooting appendix, say). Neither reaches the
+    # Contents entries - those link to a location rather than a label, so the
+    # template's filecolor rule does not match them. The Contents stays black by
+    # consequence, which is no loss: a table of contents does not need colour to
+    # advertise that it is navigable.
+    citecolor: "#1a4b8c"
+    linkcolor: "#1a4b8c"
+    filecolor: "#1a4b8c"
+
+    # Two counting symbols in a Typst numbering pattern means "current of total".
+    # A guide gets printed; a loose page should say which page it is.
+    page-numbering: "1 of 1"
+
+    # Geometry for the logo declared in _brand.yml. Leave this commented out
+    # until a logo is added there, then uncomment both together; _brand.yml
+    # explains why the logo is sized the way it is.
+    #
+    # logo:
+    #   location: right-top
+    #   width: 1.2in
+    #   padding-top: 0.4cm
+    #   padding-right: 2cm
+
+    # Keep the intermediate .typ. Costs nothing and makes layout problems
+    # debuggable without re-running the whole pipeline.
+    keep-typ: true
+
+  # HTML is off. To publish the same chapters as a web page too, uncomment the
+  # block below; drawings written in Typst appear in the PDF only.
+  #
+  # html:
+  #   toc: true
+  #   toc-depth: 2
+  #   number-sections: true
+  #   embed-resources: true
+
+# Callout icons come from Font Awesome, which is often not installed and is not
+# on a CI runner either - leaving them on renders a missing-glyph box. The
+# coloured band and bold title carry the callout perfectly well without one.
+callout-icon: false
+
+# Tables in a guide are reference material, not figures. Put the caption above
+# the table, where a reader looks first.
+tbl-cap-location: top

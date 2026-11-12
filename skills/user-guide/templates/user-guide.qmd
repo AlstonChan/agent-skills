@@ -1,0 +1,114 @@
+---
+title: "[[APP_NAME]] User Guide"
+subtitle: "Unversioned"
+author: "[[COMPANY]]"
+date: today
+date-format: "D MMMM YYYY"
+---
+
+<!--
+  This file is the spine of the guide. Chapters live in _chapters/ and are
+  pulled in below; the leading underscore keeps Quarto from also rendering
+  each one as a standalone document.
+
+  Build:  quarto render docs/user-guide.qmd
+  Output: docs/_output/user-guide.pdf
+
+  The `subtitle` above is overridden by the build, e.g.
+    quarto render docs/user-guide.qmd -M "subtitle=Version 1.2.3"
+  so a printed page says which build it documents. It reads "Unversioned" only
+  when rendered by hand.
+-->
+
+{{< pagebreak >}}
+
+<!--
+  List of Tables. The substance of a guide is its reference tables, so this is a
+  real lookup index rather than front matter.
+
+  Built by hand because `lot: true` does nothing here: Quarto's format reference
+  lists the option, but the Typst writer never emits the second outline. Quarto
+  does tag every captioned table as a float of kind "quarto-float-tbl", so
+  selecting on that gives the same result.
+
+  Only captioned tables appear. Every reference table carries a caption; short
+  inline enumerations are left uncaptioned deliberately so they do not dilute
+  the list. An uncaptioned lookup table is invisible here, which is the whole
+  point of the index - check-guide.ts fails the guide when a table has no caption.
+-->
+```{=typst}
+#outline(
+  title: [List of Tables],
+  target: figure.where(kind: "quarto-float-tbl"),
+)
+```
+
+{{< pagebreak >}}
+
+<!--
+  Page furniture for the body. Placed after the front matter so the title page,
+  the Contents and the List of Tables all stay clean, and so this `set page`
+  rule lands on a page boundary rather than forcing a blank page of its own.
+
+  The version reaches the header through the `meta` shortcode, reading the same
+  `subtitle` the build overrides with -M.
+-->
+```{=typst}
+#set page(
+  header: [
+    #set text(8pt, fill: luma(40%))
+    [[APP_NAME]] User Guide --- {{< meta subtitle >}}
+    #h(1fr)
+  ],
+)
+```
+
+<!--
+  Let a long table run onto the next page. Quarto wraps every captioned table in
+  `#figure([#table(...)])`, and a Typst figure lays its body out in a block that
+  cannot break -- so a table taller than the text area does not paginate. It runs
+  past the bottom margin and every remaining row is painted on top of the last one.
+  The rows are still in the PDF; they are just stacked into one illegible line.
+
+  Scoped to the table kind on purpose. A bare `#show figure:` would also let a
+  screenshot split across a page boundary, which is not wanted -- an image figure
+  always fits, so it has nothing to gain and a caption to lose.
+-->
+```{=typst}
+#show figure.where(kind: "quarto-float-tbl"): set block(breakable: true)
+```
+
+{{< include _chapters/01-getting-started.md >}}
+
+{{< pagebreak >}}
+
+{{< include _chapters/02-area.md >}}
+
+{{< pagebreak >}}
+
+{{< include _chapters/10-settings.md >}}
+
+{{< pagebreak >}}
+
+<!--
+  The appendices are titled "Appendix: ..." but section-numbering above would
+  otherwise number them as the next chapters. Reset the heading counter and
+  switch to letters so they read A, B, C.
+
+  Quarto emits cross-references as native `#ref()`, so @sec-terms and friends
+  pick the new letters up on their own - no reference needs editing.
+-->
+```{=typst}
+#counter(heading).update(0)
+#set heading(numbering: "A.1")
+```
+
+{{< include _chapters/A0-terms.md >}}
+
+{{< pagebreak >}}
+
+{{< include _chapters/A1-troubleshooting.md >}}
+
+{{< pagebreak >}}
+
+{{< include _chapters/A2-message-index.md >}}

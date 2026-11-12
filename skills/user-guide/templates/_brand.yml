@@ -1,0 +1,33 @@
+# Brand definition for the user guide. Picked up automatically because it sits
+# next to _quarto.yml; nothing in _quarto.yml has to reference it.
+#
+# Only the logo is defined here on purpose. Adding `color` or `typography` would
+# restyle the whole document, and the guide's typography is chosen deliberately.
+#
+# The logo is off until the project has one. To turn it on, put the file in
+# docs/brand/ - not docs/images/, where check-guide.ts demands a row in IMAGES.md
+# for every file and a logo is not a screenshot - then uncomment the block below
+# and the `logo:` geometry in _quarto.yml.
+#
+# Quarto compiles a brand logo to an unconditional `#set page(background:)`, so
+# it lands on every page rather than only the title page the brand documentation
+# suggests. Sizing it to fit *within the top margin* (the geometry in
+# _quarto.yml) is what makes that harmless: the logo never reaches the text
+# block, so it cannot overprint body text or the Contents. It reads as a
+# letterhead, and the running header set in user-guide.qmd sits at the opposite
+# side of the same margin without colliding. A taller logo overprints, so resize
+# the file, or the width and padding, before moving it out of the margin.
+#
+# logo:
+#   images:
+#     company:
+#       path: brand/logo.png
+#       alt: Company logo
+#   small: company
+#   medium: company
+#   large: company
+
+# Quarto rejects a brand file that holds no keys at all ("Brand validation
+# failed"), which is what this file would be while the logo above is off. An
+# empty `meta` is the smallest thing that validates, so leave it in place.
+meta: {}
