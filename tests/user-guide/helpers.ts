@@ -1,5 +1,7 @@
 // Shared by the user-guide tests. Runs under `quarto run`, so only Deno built-ins are used.
 
+import { quartoCommand } from "../../skills/user-guide/scripts/quarto.ts";
+
 const here = import.meta.dirname;
 if (here === undefined) {
   throw new Error("helpers.ts must be loaded from a file: URL");
@@ -29,9 +31,17 @@ async function systemTempDir(): Promise<string> {
   return probe.replace(/[\\/][^\\/]*$/, "");
 }
 
-/** Every test folder lives under this one. The space in its name is deliberate. */
-export async function testRoot(): Promise<string> {
-  return `${await systemTempDir()}/user guide tests`;
+let runRoot: Promise<string> | undefined;
+
+/**
+ * The folder every test folder of this run lives under: one subfolder per run of the tests, inside
+ * a folder whose name holds a space on purpose, so two runs never touch each other's folders.
+ */
+export function testRoot(): Promise<string> {
+  runRoot ??= systemTempDir().then(
+    (dir) => `${dir}/user guide tests/run-${crypto.randomUUID().slice(0, 8)}`,
+  );
+  return runRoot;
 }
 
 /** A fresh, empty folder for one test, under a path that contains a space. */
@@ -39,12 +49,6 @@ export async function newTestDir(name: string): Promise<string> {
   const root = await testRoot();
   await Deno.mkdir(root, { recursive: true });
   return await Deno.makeTempDir({ dir: root, prefix: `${name.replace(/[^\w-]+/g, "-")}-` });
-}
-
-function quartoCommand(): string {
-  const bin = Deno.env.get("QUARTO_BIN_PATH");
-  if (!bin) return "quarto";
-  return `${bin.replace(/[\\/]+$/, "")}/${Deno.build.os === "windows" ? "quarto.exe" : "quarto"}`;
 }
 
 /** Runs `quarto run <script> ...args` and collects its exit code and output. */

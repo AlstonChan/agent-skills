@@ -47,4 +47,8 @@ if (failed > 0) {
   console.log(`test folders kept in ${await testRoot()}`);
   Deno.exit(1);
 }
-await Deno.remove(await testRoot(), { recursive: true });
+try {
+  await Deno.remove(await testRoot(), { recursive: true });
+} catch (error) {
+  if (!(error instanceof Deno.errors.NotFound)) throw error;
+}

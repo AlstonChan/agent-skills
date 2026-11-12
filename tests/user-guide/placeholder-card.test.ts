@@ -247,6 +247,13 @@ export const tests: Record<string, () => Promise<void>> = {
     assert(lines[0].includes("--why"), `message names the argument: ${lines[0]}`);
   },
 
+  "a docs folder name with two spaces is used as written": async () => {
+    const docs = `${await newTestDir("card-double-space")}/two  spaces`;
+    await generateOk(docs, card());
+    await pngSize(`${docs}/images/01-main-window.png`);
+    assertEquals(1, rows(await imagesMd(docs)).length, "row count");
+  },
+
   "CRLF is kept": async () => {
     const docs = await newTestDir("card-crlf");
     await Deno.mkdir(`${docs}/images`);

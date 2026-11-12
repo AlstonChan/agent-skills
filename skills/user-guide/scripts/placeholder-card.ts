@@ -8,20 +8,17 @@
 // --capture defaults to the "Capture it:" line of IMAGES.md; a new IMAGES.md needs it.
 // Exits 0 on success; on failure exits 1 with one message line on stderr.
 
+import { quartoCommand } from "./quarto.ts";
+
 const NAME = "placeholder-card";
 const REQUIRED = ["docs", "file", "section", "shows", "how", "why"] as const;
 const OPTIONAL = ["capture"] as const;
+const PATHS: readonly string[] = ["docs", "file"];
 
 const TABLE_HEADER = "| File | Section | Shows | How to get there | Status |";
 const TABLE_RULE = "| :--- | :--- | :--- | :--- | :--- |";
 
-function quartoCommand(): string {
-  const bin = Deno.env.get("QUARTO_BIN_PATH");
-  if (!bin) return "quarto";
-  return `${bin.replace(/[\\/]+$/, "")}/${Deno.build.os === "windows" ? "quarto.exe" : "quarto"}`;
-}
-
-/** Collapses every run of whitespace, newlines included, so a value stays on one table line. */
+/** Collapses every run of whitespace, newlines included, so a text value stays on one table line. */
 function oneLine(text: string): string {
   return text.replace(/\s+/g, " ").trim();
 }
@@ -35,7 +32,8 @@ function parseArgs(argv: string[]): Record<string, string> {
       throw new Error(`unknown argument ${flag}`);
     }
     if (i + 1 >= argv.length) throw new Error(`missing a value for ${flag}`);
-    values[flag.slice(2)] = oneLine(argv[i + 1]);
+    const name = flag.slice(2);
+    values[name] = PATHS.includes(name) ? argv[i + 1] : oneLine(argv[i + 1]);
   }
   for (const name of REQUIRED) {
     if (!values[name]) throw new Error(`missing --${name}`);
