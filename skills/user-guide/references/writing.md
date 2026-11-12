@@ -74,7 +74,9 @@ app. Rewrite each chapter whole from the code ([sourcing.md](sourcing.md)), then
 - **Link instead of repeating**: `@sec-library-search`, `@fig-library-search`, `@tbl-settings`.
 - **No `[[…]]` anywhere in the guide**, not even inside a code block: the check reads it as an
   unfilled template token.
-- **Keep each file's line endings.** Edit with a tool that preserves them.
+- **Keep each file's line endings.** Edit with a tool that preserves them, and check with
+  `git ls-files --eol docs` before committing: a chapter that turned from CRLF to LF, or back,
+  shows every line as changed.
 
 ## Tables
 

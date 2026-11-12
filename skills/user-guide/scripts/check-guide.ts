@@ -28,7 +28,7 @@ const SPINE = "user-guide.qmd";
 const IMAGE_FILE = /\.(png|jpe?g|gif|svg|webp)$/i;
 const TOKEN = /\[\[[^\[\]\r\n]+\]\]/g;
 const TEMPLATE_MARKER = "<!-- Template:";
-const RENDER_WARNING =/\bwarn(ing)?\b/i;
+const RENDER_WARNING = /\bwarn(ing)?\b/i;
 const ANSI = /\u001b\[[0-9;]*[A-Za-z]/g;
 
 interface Problem {

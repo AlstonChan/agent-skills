@@ -33,10 +33,9 @@ date-format: "D MMMM YYYY"
   does tag every captioned table as a float of kind "quarto-float-tbl", so
   selecting on that gives the same result.
 
-  Only captioned tables appear. Every reference table carries a caption; short
-  inline enumerations are left uncaptioned deliberately so they do not dilute
-  the list. An uncaptioned lookup table is invisible here, which is the whole
-  point of the index - check-guide.ts fails the guide when a table has no caption.
+  Only captioned tables appear, so every table carries a caption and
+  check-guide.ts fails the guide on one that has none. A short enumeration not
+  worth listing here is written as a bullet list, not as a table.
 -->
 ```{=typst}
 #outline(

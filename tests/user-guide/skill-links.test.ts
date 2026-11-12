@@ -15,6 +15,25 @@ async function exists(path: string): Promise<boolean> {
   }
 }
 
+/**
+ * The link target as a path inside the skill folder, with `.` and `..` segments resolved, or
+ * undefined when it is absolute or climbs out of the skill folder.
+ */
+function insideSkill(target: string): string | undefined {
+  if (/^[\\/]/.test(target)) return undefined;
+  const kept: string[] = [];
+  for (const segment of target.split(/[\\/]/)) {
+    if (segment === "" || segment === ".") continue;
+    if (segment === "..") {
+      if (kept.length === 0) return undefined;
+      kept.pop();
+    } else {
+      kept.push(segment);
+    }
+  }
+  return kept.length === 0 ? undefined : kept.join("/");
+}
+
 /** The YAML front matter's lines, between the opening and closing `---`. */
 function frontMatter(text: string): string[] {
   const lines = text.split(/\r?\n/);
@@ -41,12 +60,31 @@ export const tests: Record<string, () => Promise<void>> = {
       const target = match[1].replace(/#.*$/, "");
       if (target === "" || /^[a-z][a-z0-9+.-]*:/i.test(target)) continue;
       relative++;
+      const path = insideSkill(target);
       assert(
-        await exists(`${skillDir}/${target}`),
+        path !== undefined && await exists(`${skillDir}/${path}`),
         `SKILL.md links ${match[1]}, which is not under skills/user-guide/`,
       );
     }
     assert(relative > 0, "SKILL.md links no file of the skill");
+  },
+
+  "a link that climbs out of the skill folder does not resolve": () => {
+    const outside = [
+      "../README.md",
+      "../../README.md",
+      "references/../../README.md",
+      "..\\SKILL.md",
+      "/SKILL.md",
+    ];
+    for (const target of outside) {
+      assert(insideSkill(target) === undefined, `${target} counts as inside the skill`);
+    }
+    assert(
+      insideSkill("references/../references/./rules.md") === "references/rules.md",
+      "a ../ that stays inside the skill does not resolve to references/rules.md",
+    );
+    return Promise.resolve();
   },
 
   "SKILL.md links every reference file": async () => {

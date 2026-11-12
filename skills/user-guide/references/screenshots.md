@@ -66,7 +66,7 @@ quarto run <skill>/scripts/placeholder-card.ts --docs docs --file 02-library-sea
 | :--- | :--- |
 | `--docs` | The guide's folder: `docs` |
 | `--file` | The picture's plain `.png` name, as the figure uses it |
-| `--section` | The id of the section the picture sits in, without `#` |
+| `--section` | The id of the nearest heading above the picture that has one, without `#` |
 | `--shows` | What the picture must show |
 | `--how` | The steps in the app to reach that screen, on one line |
 | `--why` | `new picture`, or `stale: <what changed>` |

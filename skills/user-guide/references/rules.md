@@ -28,6 +28,11 @@ file per chapter in `docs/_chapters/`, every picture in `docs/images/`.
 - **Nothing unconfirmed reaches the guide**, not even marked. It goes in `docs/OPEN-QUESTIONS.md`
   as one numbered item: the question, where it came from, what will be written for each answer.
   When the answer comes, write it into its chapter and delete the item.
+- **A section two areas share lives once**, in the chapter that owns it; the other links to it
+  with `@sec-…` instead of repeating it.
+- **The message index lists every titled dialog and every refusal, warning or error a user can
+  read long enough to act on**, quoted exactly; a notification that closes on its own stays out. A
+  change that adds, rewords or removes one changes its row.
 - **Pictures by default**: one per screen or dialog a user meets, named
   `<chapter number>-<what>.png` in `docs/images/`, where the chapter number is the chapter file's
   prefix (`02-library-search.png` for the Library chapter, `02-library.md`).

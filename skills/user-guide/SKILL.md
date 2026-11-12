@@ -23,8 +23,8 @@ installed in.
   even marked ([references/sourcing.md](references/sourcing.md)).
 - **Pictures by default**, one per screen or dialog a user meets. Capture one yourself only through
   the gate in [references/screenshots.md](references/screenshots.md): ask before launching or
-  operating the app, use sample or test data only, and inspect each capture for private data. Otherwise, or
-  at any doubt, make a placeholder card with the script, never by hand.
+  operating the app, use sample or test data only, and inspect each capture for private data.
+  Otherwise, or at any doubt, make a placeholder card with `placeholder-card.ts`, never by hand.
 - **The template text is invented.** Every chapter template's sample prose describes no real app.
   Rewrite the chapter from the code before deleting its `<!-- Template: … -->` line
   ([references/writing.md](references/writing.md)).
@@ -46,10 +46,12 @@ exists and a change alters what a user sees; **adopt** when a Quarto guide exist
 3. **Propose the chapter list and interview once.** Lay the chapters out as
    [references/writing.md](references/writing.md) says: getting started, one per area in the order
    users meet them, the reference chapters the app has, the three appendices. Send the list with one
-   numbered set of concrete questions; what stays unanswered goes in `OPEN-QUESTIONS.md`.
+   numbered set of concrete questions; what stays unanswered goes in `docs/OPEN-QUESTIONS.md`
+   once step 4 has copied it in.
 4. **Set up** ([references/setup.md](references/setup.md)): copy `<skill>/templates/` into `docs/`,
    fill every token, set the spine's chapter list and delete its marker, add the logo if there is
-   one, set up the version stamp, and ignore the render output.
+   one, and ignore the render output. The version stamp is a render command for the release
+   (setup.md, step 7); nothing in `docs/` changes for it.
 5. **Write chapter by chapter** ([references/writing.md](references/writing.md)), each rewritten
    from the code before its marker goes. Capture each picture and add its row to
    `docs/images/IMAGES.md`, or make its card:
@@ -60,7 +62,8 @@ exists and a change alters what a user sees; **adopt** when a Quarto guide exist
      --how "Open Sample Viewer, choose Library, type tile in Search" --why "new picture"
    ```
 
-   The three pictures the templates point at need a capture or a card before the first render.
+   The pictures the templates point at need a capture or a card before the first render: three,
+   and one overview more for each area added.
 6. **Check as you go** until it prints no `ERROR:` line. `--draft` only warns on cards and template
    markers; `--no-render` skips the slow render. Read render warnings with
    [references/quarto.md](references/quarto.md).
@@ -90,22 +93,28 @@ exists and a change alters what a user sees; **adopt** when a Quarto guide exist
    change ([references/sourcing.md](references/sourcing.md)). A new doubt goes in
    `OPEN-QUESTIONS.md`; an answered item goes into its chapter and leaves the file.
 3. **Recapture each picture the change made stale**, through the gate, or turn it into a card with
-   the same script and `--why "stale: <what changed>"`. Run it only on a stale picture: it
+   `placeholder-card.ts` and `--why "stale: <what changed>"`. Run it only on a stale picture: it
    overwrites a captured one ([references/screenshots.md](references/screenshots.md)). A new screen
    gets a picture or a card; a screen that is gone loses its picture, row and figure.
 4. **Keep section ids**: never rename or reuse one; a cut section retires its id from
-   `docs/help-topics.yml` and the app's code when the app links into the guide.
-5. **Run the check**, with `--draft` while cards wait and without it before a release, then report.
+   `docs/help-topics.yml` and the app's code when the app links into the guide
+   ([references/setup.md](references/setup.md#11-in-app-links-only-if-the-project-wants-them)).
+5. **Run `check-guide.ts`**, with `--draft` while cards wait and without it before a release, then
+   report.
 
 ## Adopt an existing guide
 
-1. **Add the tooling** ([references/setup.md](references/setup.md), "Bringing an existing guide
-   under the rules"): `docs/images/IMAGES.md` with a `captured` row for every picture already
-   there, and `docs/OPEN-QUESTIONS.md`.
-2. **Run the check with `--draft`** and fix what it reports.
-3. **Apply the rules from then on**: audit and rewrite only the chapters a change touches, never the
+1. **Fit the layout** the scripts expect: the spine `docs/user-guide.qmd`, the chapters in
+   `docs/_chapters/`, the pictures in `docs/images/`. Move and rename what differs, with its
+   includes and figure paths, or point `--docs` at the folder that already has that layout
+   ([references/setup.md](references/setup.md), "Bringing an existing guide under the rules").
+2. **Add the tooling**: `docs/images/IMAGES.md` from the template with its `Capture it:` line
+   filled (the card script refuses one still holding `[[`) and a `captured` row for every picture
+   already there, and `docs/OPEN-QUESTIONS.md`.
+3. **Run `check-guide.ts` with `--draft`** and fix what it reports.
+4. **Apply the rules from then on**: audit and rewrite only the chapters a change touches, never the
    whole guide at once.
-4. **Report and offer** as a new guide does.
+5. **Report and offer** as a new guide does.
 
 ## Offer the rules
 

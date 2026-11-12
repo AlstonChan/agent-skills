@@ -75,9 +75,10 @@ The spine's includes are hard-coded, one `{{< include >}}` per chapter with a
   `02-area.md` → `02-library.md`.
 - **Add an area**: copy `<skill>/templates/_chapters/02-area.md` to the next free number, fill its
   `[[AREA_NAME]]` and `[[AREA_ID]]`, and change the `02-` of its overview picture to the new
-  number, in the figure and in that picture's `IMAGES.md` row: `images/02-viewer-overview.png`
-  becomes `images/03-viewer-overview.png`. Then add its include where the chapter belongs, with a
-  page break before it. Sample Viewer's Viewer area is `03-viewer.md` (`Viewer`, `viewer`):
+  number, in the figure and in that picture's `IMAGES.md` row if it has one yet:
+  `images/02-viewer-overview.png` becomes `images/03-viewer-overview.png`. Then add its include
+  where the chapter belongs, with a page break before it. Sample Viewer's Viewer area is
+  `03-viewer.md` (`Viewer`, `viewer`):
 
   ```text
   {{< include _chapters/02-library.md >}}
@@ -97,6 +98,9 @@ The spine's includes are hard-coded, one `{{< include >}}` per chapter with a
   Plain `grep`, because the copied files are not in git yet and `git grep` skips them.
 
   A reference left behind is a render warning, which fails the check.
+- **Keep the appendices after the raw Typst block that resets the heading counter**, and every
+  other chapter before it, reference chapters included. The block is what letters the appendices
+  A, B, C; a chapter included after it is lettered as an appendix.
 - **Then delete the spine's `<!-- Template:` line.**
 
 ## 4. Rewrite every chapter from the code
@@ -110,8 +114,9 @@ while any marker remains; with `--draft` it only warns.
 ## 5. Pictures
 
 The templates point at three pictures: `01-main-window.png`, `02-<area id>-overview.png`
-(`02-library-overview.png`) and `10-settings.png`. A render fails while any of them is missing, so
-capture each one or make its card before the first render ([screenshots.md](screenshots.md)).
+(`02-library-overview.png`) and `10-settings.png`, and each area added in step 3 brings one more
+overview (`03-viewer-overview.png`). A render fails while any of them is missing, so capture each
+one or make its card before the first render ([screenshots.md](screenshots.md)).
 
 ## 6. Logo
 
@@ -136,6 +141,13 @@ quarto render docs/user-guide.qmd -M subtitle="Version 2.3.0"
 
 The PDF is `docs/_output/user-guide.pdf`. The check renders without a version; render again with
 the stamp after it passes.
+
+- **A build that is not a release stamps a version nobody can take for one**: the nearest tag and
+  how far past it the build is (`Version 2.3.0+14`, from `git describe --tags`), never the bare
+  tag of the last release.
+- **When the app ships the PDF** (a Help command opens it), the release renders the guide before it
+  packages the app, so each release carries the guide that describes it. The PDF is build output,
+  never committed.
 
 ## 8. Ignore the render output
 
@@ -198,6 +210,8 @@ the user guide"). That needs app code, so set it up only when the owner asks for
   Never inside a `:::` callout, which renders no PDF destination, so a link to it opens page one.
 - **An id is never renamed or given to another section.** A section that is cut has its id retired
   from the file and from the app's code, and its messages repointed.
+- **A new message that points into the guide adds its id to the file first**, then to the app's
+  code, and gets a row in the message index.
 - **A test in the app keeps the code's list of ids and the file in step**, failing the app's build
   when one has an id the other lacks.
 - The id is a named destination in the PDF, so a viewer that takes one opens the section itself:
@@ -210,7 +224,19 @@ so later changes keep the guide right.
 
 ## Bringing an existing guide under the rules
 
-When the project already has a Quarto guide, copy only what it lacks: `docs/images/IMAGES.md`, with
-a `captured` row for every picture already there, and `docs/OPEN-QUESTIONS.md`. Run the check with
-`--draft` and fix what it reports. From then on, apply the rules to each chapter a change touches,
-not to the whole guide at once.
+When the project already has a Quarto guide, fit it to the layout the scripts expect, then copy
+only what it lacks.
+
+- **The layout**: the spine is `docs/user-guide.qmd`, the chapters are `.md` files in
+  `docs/_chapters/`, and every picture is in `docs/images/`. The check reads only those; a chapter
+  anywhere else is never checked, and a missing `docs/user-guide.qmd` is the only error it prints.
+  Move and rename what differs, and update the spine's includes and the figure paths with it.
+- **A guide that keeps its own folder** gets `--docs <that folder>` on both scripts instead, as
+  long as the folder holds that layout. The card still tells its reader to save the capture in
+  `docs/images`, so prefer moving the guide to `docs/`.
+- **Copy `<skill>/templates/images/IMAGES.md`** to `docs/images/IMAGES.md`, fill its `Capture it:`
+  line ([2. Fill the tokens](#2-fill-the-tokens)), and add a `captured` row for every picture
+  already there. The card script refuses to run while that line still holds `[[`.
+- **Copy `<skill>/templates/OPEN-QUESTIONS.md`** to `docs/OPEN-QUESTIONS.md`.
+- **Run the check with `--draft`** and fix what it reports. From then on, apply the rules to each
+  chapter a change touches, not to the whole guide at once.
