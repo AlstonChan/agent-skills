@@ -87,6 +87,7 @@ The spine's includes are hard-coded, one `{{< include >}}` per chapter with a
 
   {{< include _chapters/03-viewer.md >}}
   ```
+
 - **Drop a starter chapter the app has no use for**: delete the file, its include and its page
   break, its pictures and their rows in `IMAGES.md`, and every `@sec-` that points at it. The other
   templates point at `@sec-settings`, so dropping `90-settings.md` means:
@@ -197,6 +198,7 @@ A CI runner has no skill installed, so CI runs a copy of the check:
   ```bash
   quarto run build/user-guide/check-guide.ts --docs docs
   ```
+
 - **Never edit the copy.** Re-copy both files whenever the skill's scripts change.
 - **Only the check is copied.** The card script also needs its `placeholder-card.typ` and runs from
   the installed skill, never from CI.
@@ -215,6 +217,7 @@ the user guide"). That needs app code, so set it up only when the owner asks for
       chapter: Library
       section: When a folder is missing
   ```
+
 - **Each id sits on a plain heading** in a chapter: `## When a folder is missing {#sec-library-missing-folder}`.
   Never inside a `:::` callout, which renders no PDF destination, so a link to it opens page one.
 - **An id is never renamed or given to another section.** A section that is cut has its id retired

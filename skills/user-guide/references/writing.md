@@ -72,6 +72,7 @@ app. Rewrite each chapter whole from the code ([sourcing.md](sourcing.md)), then
   ```markdown
   ![The Library list narrowed by Search.](images/02-library-search.png){#fig-library-search width=90%}
   ```
+
 - **Power-user detail goes in a reference table**, not in the middle of a task: a task says "Press
   **Export**"; the settings chapter says which formats it writes and where.
 - **Link instead of repeating**: `@sec-library-search`, `@fig-library-search`, `@tbl-settings`.
@@ -93,6 +94,7 @@ app. Rewrite each chapter whole from the code ([sourcing.md](sourcing.md)), then
 
   : The settings and their defaults {#tbl-settings}
   ```
+
 - **A short list that is not reference material is a bullet list**, not an uncaptioned table.
 - **A `|` inside a cell is written `\|`.**
 

@@ -16,6 +16,7 @@ a real guide; keep the template line that handles it.
   ## When a folder is missing {#sec-library-missing-folder}     ✗
   :::
   ```
+
 - **`lot: true` does nothing in Typst.** Quarto's reference lists it, but the Typst writer emits no
   List of Tables. The spine builds one by hand with `#outline(target: figure.where(kind:
   "quarto-float-tbl"))`. Only captioned tables are figures of that kind, which is why every table
@@ -36,6 +37,7 @@ a real guide; keep the template line that handles it.
   ```bash
   quarto typst compile docs/user-guide.typ "page-{p}.png" --ppi 72
   ```
+
 - **Callout icons need Font Awesome**, which is often missing, and never on a CI runner: a missing
   glyph renders as a box. The template sets `callout-icon: false`.
 - **A long captioned table would not break across pages**: a Typst figure is one unbreakable block,

@@ -28,6 +28,7 @@ harness that draws a window, say). Before any of it:
   90-settings-display.png     90-settings.md, the Display page
   A1-library-empty.png        A1-troubleshooting.md
   ```
+
 - **PNG only**, so a card and the picture that replaces it share one name: the card script takes a
   plain `.png` file name and nothing else.
 - **Place it in its section** as a figure ([writing.md](writing.md)):
@@ -96,6 +97,7 @@ drift alone is not stale.
     --how "Open Sample Viewer, choose Library, type tile in Filter" \
     --why "stale: Search was renamed Filter"
   ```
+
 - **Only for a picture that is stale.** The script overwrites a `captured` picture and its row
   without asking; the old screenshot then survives only in git.
 

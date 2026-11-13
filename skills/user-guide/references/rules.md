@@ -22,6 +22,7 @@ file per chapter in `docs/_chapters/`, every picture in `docs/images/`.
   git grep -n "Search" docs/_chapters          the steps, tables and the message index
   git grep -n "Search" docs/images/IMAGES.md   the pictures that show the box
   ```
+
 - **Every fact comes from the code**: each label, menu path, default, permission and message is
   quoted exactly as the app shows it, in the guide's language, and each "how to get there" is
   traced from the code. Agent memory is a lead, never a fact.
@@ -42,6 +43,7 @@ file per chapter in `docs/_chapters/`, every picture in `docs/images/`.
   ```text
   | `02-library-search.png` | sec-library-search | The Library list narrowed by Search | Open Sample Viewer, choose Library, type "tile" in Search | captured |
   ```
+
 - **A stale picture becomes a card** until it is retaken. Stale means its layout, controls, labels
   or columns changed; colour or font drift alone is not stale. The card comes from the script,
   never drawn by hand, and the script also rewrites the picture's row:
