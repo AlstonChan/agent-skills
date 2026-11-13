@@ -1,0 +1,56 @@
+name: plugin-version
+
+# Claude Code offers a plugin update only when its version changes, so every change under
+# skills/<name>/ must bump that plugin's version in .claude-plugin/marketplace.json.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "skills/**"
+      - ".claude-plugin/marketplace.json"
+  pull_request:
+    paths:
+      - "skills/**"
+      - ".claude-plugin/marketplace.json"
+
+permissions:
+  contents: read
+
+jobs:
+  bumped:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Every changed skill has a new plugin version
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if ! git cat-file -e "$BASE^{commit}" 2>/dev/null; then
+            echo "::notice::No base commit to compare with ($BASE); skipped."
+            exit 0
+          fi
+          manifest=.claude-plugin/marketplace.json
+          old_manifest=$(git show "$BASE:$manifest" 2>/dev/null || echo '{"plugins":[]}')
+          status=0
+          for skill in $(git diff --name-only "$BASE" HEAD -- skills | cut -d/ -f2 | sort -u); do
+            [ -d "skills/$skill" ] || continue
+            plugin=$(jq -r --arg s "./skills/$skill" '.plugins[] | select(.skills | index($s)) | .name' "$manifest")
+            if [ -z "$plugin" ]; then
+              echo "::error file=$manifest::skills/$skill has no plugin entry"
+              status=1
+              continue
+            fi
+            new=$(jq -r --arg p "$plugin" '.plugins[] | select(.name == $p) | .version' "$manifest")
+            old=$(jq -r --arg p "$plugin" '.plugins[] | select(.name == $p) | .version' <<< "$old_manifest")
+            if [ "$old" = "$new" ]; then
+              echo "::error file=$manifest::skills/$skill changed but plugin $plugin is still $new"
+              status=1
+            else
+              echo "$plugin: ${old:-new} -> $new"
+            fi
+          done
+          exit $status

@@ -12,6 +12,7 @@ on:
       - "skills/user-guide/**"
       - "tests/user-guide/**"
       - ".github/workflows/test.yml"
+  workflow_dispatch:
 
 permissions:
   contents: read
