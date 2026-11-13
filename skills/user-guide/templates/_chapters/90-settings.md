@@ -11,7 +11,7 @@ defaults do not suit the way you work; nothing here alters your data.
 2. Select the page you want from the list on the left.
 3. Change the value, then press **Save**. Press **Cancel** to leave without changing anything.
 
-![The settings window.](images/10-settings.png){#fig-settings width=90%}
+![The settings window.](images/90-settings.png){#fig-settings width=90%}
 
 ## What each setting does
 

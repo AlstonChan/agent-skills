@@ -87,7 +87,7 @@ date-format: "D MMMM YYYY"
 
 {{< pagebreak >}}
 
-{{< include _chapters/10-settings.md >}}
+{{< include _chapters/90-settings.md >}}
 
 {{< pagebreak >}}
 

@@ -25,7 +25,7 @@ harness that draws a window, say). Before any of it:
   ```text
   01-main-window.png          01-getting-started.md
   02-library-search.png       02-library.md, the Search section
-  10-settings-display.png     10-settings.md, the Display page
+  90-settings-display.png     90-settings.md, the Display page
   A1-library-empty.png        A1-troubleshooting.md
   ```
 - **PNG only**, so a card and the picture that replaces it share one name: the card script takes a
@@ -108,7 +108,7 @@ the owner can take them in one sitting:
 Cards waiting (2):
 - 02-library-search.png (sec-library-search): The Library list narrowed by Search.
   Open Sample Viewer, choose Library, type tile in Search.
-- 10-settings.png (sec-settings): The settings window. Choose Settings in the menu bar.
+- 90-settings.png (sec-settings): The settings window. Choose Settings in the menu bar.
 Take each with the Capture it line in docs/images/IMAGES.md, save it over the card,
 and change its Status to captured.
 ```

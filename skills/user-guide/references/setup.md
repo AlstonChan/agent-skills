@@ -26,7 +26,7 @@ docs/
 ├── _chapters/
 │   ├── 01-getting-started.md
 │   ├── 02-area.md       one per area: renamed 02-library.md below
-│   ├── 10-settings.md
+│   ├── 90-settings.md
 │   ├── A0-terms.md
 │   ├── A1-troubleshooting.md
 │   └── A2-message-index.md
@@ -89,7 +89,7 @@ The spine's includes are hard-coded, one `{{< include >}}` per chapter with a
   ```
 - **Drop a starter chapter the app has no use for**: delete the file, its include and its page
   break, its pictures and their rows in `IMAGES.md`, and every `@sec-` that points at it. The other
-  templates point at `@sec-settings`, so dropping `10-settings.md` means:
+  templates point at `@sec-settings`, so dropping `90-settings.md` means:
 
   ```bash
   grep -rn "@sec-settings" docs
@@ -114,7 +114,7 @@ while any marker remains; with `--draft` it only warns.
 ## 5. Pictures
 
 The templates point at three pictures: `01-main-window.png`, `02-<area id>-overview.png`
-(`02-library-overview.png`) and `10-settings.png`, and each area added in step 3 brings one more
+(`02-library-overview.png`) and `90-settings.png`, and each area added in step 3 brings one more
 overview (`03-viewer-overview.png`). A render fails while any of them is missing, so capture each
 one or make its card before the first render ([screenshots.md](screenshots.md)).
 

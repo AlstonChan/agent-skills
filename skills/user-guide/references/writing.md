@@ -8,16 +8,19 @@ then power users and admins. The guide must work read front to back and looked u
 | File | Chapter | Present |
 | :--- | :--- | :--- |
 | `01-getting-started.md` | Install, first run or sign-in, the main window, the first task end to end | Always |
-| `02-…` to `09-…` | One per main area or workflow, in the order a user meets them | One each |
-| `10-…` to `19-…` | Reference: settings, keyboard shortcuts, roles and permissions, where files live | Only those the app has |
+| `02-…` to `89-…` | One per main area or workflow, in the order a user meets them | One each |
+| `90-…` to `99-…` | Reference: settings, keyboard shortcuts, roles and permissions, where files live | Only those the app has |
 | `A0-terms.md` | Terms: each word that means something specific in this app | Always |
 | `A1-troubleshooting.md` | Troubleshooting, by what the user sees | Always |
 | `A2-message-index.md` | Every message worth looking up, and what to do | Always |
 
 - **A file's number prefix places it in the scheme; only the spine sets the order** through its
   includes ([setup.md](setup.md) adds, renames and drops them). The printed chapter number follows
-  the spine order, not the prefix: Sample Viewer's `10-settings.md` prints as chapter 4, after
-  `01`, `02` and `03`. Picture names use the prefix (`10-settings.png`).
+  the spine order, not the prefix: Sample Viewer's `90-settings.md` prints as chapter 4, after
+  `01`, `02` and `03`. Picture names use the prefix (`90-settings.png`).
+- **Areas take the next free number from `02`; reference chapters start at `90`.** The gap keeps
+  room for every area an app has, so adding one never renumbers a reference chapter or its
+  pictures. A tenth area is `11-…`, not a reason to move `90-settings.md`.
 - **A section two areas share lives once**, in the chapter that owns it; the other links to it.
 
 Sample Viewer's chapters:
@@ -27,8 +30,8 @@ docs/_chapters/
 ├── 01-getting-started.md
 ├── 02-library.md          sec-library
 ├── 03-viewer.md           sec-viewer
-├── 10-settings.md         sec-settings
-├── 11-shortcuts.md        sec-shortcuts
+├── 90-settings.md         sec-settings
+├── 91-shortcuts.md        sec-shortcuts
 ├── A0-terms.md            sec-terms
 ├── A1-troubleshooting.md  sec-troubleshooting
 └── A2-message-index.md    sec-message-index

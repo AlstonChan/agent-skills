@@ -77,7 +77,7 @@ function filledGuide(): Promise<string> {
 
     const images = await referencedImages(docs);
     assertEquals(
-      ["01-main-window.png", "02-library-overview.png", "10-settings.png"],
+      ["01-main-window.png", "02-library-overview.png", "90-settings.png"],
       [...images.keys()].sort(),
       "pictures the templates reference",
     );
