@@ -15,31 +15,28 @@
 
 #let red = rgb("#c62828")
 
-// Red diagonal stripes round the card, so it can never pass for a real screenshot on the page.
-#let stripes = tiling(size: (14pt, 14pt))[
-  #place(line(start: (0pt, 14pt), end: (14pt, 0pt), stroke: 4pt + red))
-  #place(line(start: (-7pt, 7pt), end: (7pt, -7pt), stroke: 4pt + red))
-  #place(line(start: (7pt, 21pt), end: (21pt, 7pt), stroke: 4pt + red))
-]
-
-#set page(width: 600pt, height: auto, margin: 0pt, fill: white)
+#set page(width: 600pt, height: auto, margin: 6pt, fill: white)
 // DejaVu Sans Mono is embedded in Typst, so `--ignore-system-fonts` draws the same card everywhere.
 #set text(font: "DejaVu Sans Mono", size: 12pt, fill: rgb("#222222"))
 #set par(leading: 0.6em, spacing: 0.9em)
 
-#block(width: 100%, fill: stripes, inset: 10pt)[
-  #block(width: 100%, fill: rgb("#f2f2f2"), inset: 16pt)[
-    #text(weight: "bold", size: 15pt, fill: red, "REPLACE ME: " + breakable(card.file))
+// A dashed red border, so a card can never pass for a real screenshot on the page.
+#block(
+  width: 100%,
+  fill: rgb("#f2f2f2"),
+  stroke: (paint: red, thickness: 3pt, dash: (array: (12pt, 7pt), phase: 0pt)),
+  inset: 18pt,
+)[
+  #text(weight: "bold", size: 15pt, fill: red, "REPLACE ME: " + breakable(card.file))
 
-    #field("Shows", breakable(card.shows))
+  #field("Shows", breakable(card.shows))
 
-    #field("How to get there", breakable(card.how))
+  #field("How to get there", breakable(card.how))
 
-    #field(
-      "Capture it",
-      breakable(sentence(card.capture))
-        + " Save it as " + breakable(card.file)
-        + " in docs/images and mark its row captured in docs/images/IMAGES.md.",
-    )
-  ]
+  #field(
+    "Capture it",
+    breakable(sentence(card.capture))
+      + " Save it as " + breakable(card.file)
+      + " in docs/images and mark its row captured in docs/images/IMAGES.md.",
+  )
 ]
