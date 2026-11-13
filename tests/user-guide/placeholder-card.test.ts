@@ -264,8 +264,8 @@ export const tests: Record<string, () => Promise<void>> = {
       await Deno.copyFile(`${skillDir}/scripts/${name}`, `${scripts}/${name}`);
     }
     const template = await Deno.readTextFile(`${skillDir}/scripts/placeholder-card.typ`);
-    const broken = template.replace("Libertinus Serif", "No Such Font");
-    assert(broken !== template, "the card template no longer names Libertinus Serif");
+    const broken = template.replace('font: "DejaVu Sans Mono"', 'font: "No Such Font"');
+    assert(broken !== template, "the card template no longer names DejaVu Sans Mono");
     const copy = `${scripts}/placeholder-card.typ`;
     const args = (docs: string, why = "new picture") => [
       "--docs", docs,
