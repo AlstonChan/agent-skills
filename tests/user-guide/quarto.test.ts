@@ -1,8 +1,17 @@
+/**
+ * @file Pins how `quartoCommand` finds Quarto: beside `QUARTO_BIN_PATH` with any trailing
+ * separators removed, else `quarto` on the PATH.
+ */
+
 import { assertEquals } from "./helpers.ts";
 import { quartoCommand } from "../../skills/user-guide/scripts/quarto.ts";
 
 const exe = Deno.build.os === "windows" ? "quarto.exe" : "quarto";
 
+/**
+ * Runs `run` with `QUARTO_BIN_PATH` set to `value`, or unset when `value` is undefined, and puts
+ * the previous value back afterwards even if `run` throws.
+ */
 function withBinPath(value: string | undefined, run: () => void): void {
   const before = Deno.env.get("QUARTO_BIN_PATH");
   try {
@@ -15,6 +24,7 @@ function withBinPath(value: string | undefined, run: () => void): void {
   }
 }
 
+/** Test cases run by run-tests.ts, keyed by name. */
 export const tests: Record<string, () => Promise<void>> = {
   "a trailing backslash on the bin path is stripped": () => {
     withBinPath("C:\\Program Files\\Quarto\\bin\\", () => {

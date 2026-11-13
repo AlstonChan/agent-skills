@@ -1,3 +1,10 @@
+/**
+ * @file Pins check-guide.ts by running it on small guides built on disk: a clean guide passes, and
+ * each rule (placeholders, orphan or missing pictures, uncaptioned tables, template tokens and
+ * markers, render warnings and failures) gives its ERROR or WARN line, with `--draft` softening
+ * some of them and `--no-render` skipping the render.
+ */
+
 import { assert, assertEquals, newTestDir, runScript, skillDir } from "./helpers.ts";
 
 const script = `${skillDir}/scripts/check-guide.ts`;
@@ -36,6 +43,7 @@ const CHAPTER = [
 
 const QUARTO_YML = ["project:", "  type: default", "", "format: typst", ""].join("\n");
 
+/** Returns the text of an IMAGES.md that holds `rows` under the standard header. */
 const imagesMd = (...rows: string[]) =>
   ["# Images", "", "Capture it: Press the capture hotkey.", "", HEADER, RULE, ...rows, ""].join(
     "\n",
@@ -43,7 +51,10 @@ const imagesMd = (...rows: string[]) =>
 
 let card: Promise<Uint8Array> | undefined;
 
-/** One placeholder card, drawn by the real generator the first time it is needed. */
+/**
+ * Returns the bytes of one placeholder card, drawn by the real generator the first time it is
+ * needed and reused after that.
+ */
 function cardPng(): Promise<Uint8Array> {
   card ??= (async () => {
     const dir = await newTestDir("check-card");
@@ -62,7 +73,14 @@ function cardPng(): Promise<Uint8Array> {
   return card;
 }
 
-/** A minimal guide that passes every check: one chapter, one captioned table, one captured image. */
+/**
+ * Builds a minimal guide that passes every check: one chapter, one captioned table, one captured
+ * image.
+ *
+ * @param name - Names the test folder the guide is built in.
+ * @param folder - The guide folder's name inside it, so a test can use a name with spaces.
+ * @returns The guide folder's path.
+ */
 async function buildGuide(name: string, folder = "docs"): Promise<string> {
   const docs = `${await newTestDir(name)}/${folder}`;
   await Deno.mkdir(`${docs}/_chapters`, { recursive: true });
@@ -75,10 +93,17 @@ async function buildGuide(name: string, folder = "docs"): Promise<string> {
   return docs;
 }
 
+/** Appends `text` to the existing file at `path`. */
 async function appendTo(path: string, text: string): Promise<void> {
   await Deno.writeTextFile(path, (await Deno.readTextFile(path)) + text);
 }
 
+/**
+ * Runs check-guide.ts on `docs` with the extra `flags`, and sorts its output lines into `errors`
+ * and `warnings` beside the raw result.
+ *
+ * @throws Error when an output line is neither an `ERROR: ` nor a `WARN: ` line.
+ */
 async function check(docs: string, ...flags: string[]) {
   const result = await runScript(script, ["--docs", docs, ...flags]);
   const lines = result.stdout.split(/\r?\n/).filter((line) => line.trim() !== "");
@@ -92,10 +117,12 @@ async function check(docs: string, ...flags: string[]) {
   };
 }
 
+/** Formats a run's exit code and both output streams for an assertion message. */
 function describe(result: { code: number; stdout: string; stderr: string }): string {
   return `exit ${result.code}, stdout: ${result.stdout.trim()}, stderr: ${result.stderr.trim()}`;
 }
 
+/** Test cases run by run-tests.ts, keyed by name. */
 export const tests: Record<string, () => Promise<void>> = {
   "clean guide passes": async () => {
     const docs = await buildGuide("check-clean", "docs  with spaces");

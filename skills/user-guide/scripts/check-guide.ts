@@ -1,25 +1,27 @@
-// Checks a user guide before it is released.
-//
-//   quarto run check-guide.ts --docs <dir> [--draft] [--no-render]
-//
-// <dir> holds user-guide.qmd (the spine), _chapters/*.md and images/ with images/IMAGES.md.
-// Prints one line per problem, "ERROR: <text>" or "WARN: <text>", after collecting all of them,
-// and exits 1 if any line is an ERROR, else 0. Prints nothing when the guide is clean.
-//
-// --draft turns pictures still marked placeholder and template markers still in the text from
-// errors into warnings, for a guide that is not being released yet. --no-render skips
-// `quarto render`, which is the slow check.
-//
-// Checks:
-//   - user-guide.qmd exists (when it does not, that is the only line);
-//   - images/IMAGES.md exists (when it does not, the picture checks are skipped);
-//   - no picture is still marked placeholder;
-//   - every picture file has a row, and every row has a file;
-//   - every pipe table in a chapter is followed by a ": Caption {#tbl-id}" line;
-//   - no unfilled [[TOKEN]] is left in the spine or a chapter;
-//   - no `<!-- Template:` marker is left in the spine or a chapter: the starter text under it is
-//     sample prose that nobody has confirmed;
-//   - `quarto render` exits 0 and prints no warning.
+/**
+ * @file Checks a user guide before it is released.
+ *
+ * Usage: quarto run check-guide.ts --docs <dir> [--draft] [--no-render]
+ *
+ * `<dir>` holds user-guide.qmd (the spine), _chapters/*.md and images/ with images/IMAGES.md.
+ * Prints one line per problem, "ERROR: <text>" or "WARN: <text>", after collecting all of them,
+ * and exits 1 if any line is an ERROR, else 0. Prints nothing when the guide is clean.
+ *
+ * `--draft` turns pictures still marked placeholder and template markers still in the text from
+ * errors into warnings, for a guide that is not being released yet. `--no-render` skips
+ * `quarto render`, which is the slow check.
+ *
+ * Checks:
+ *   - user-guide.qmd exists (when it does not, that is the only line);
+ *   - images/IMAGES.md exists (when it does not, the picture checks are skipped);
+ *   - no picture is still marked placeholder;
+ *   - every picture file has a row, and every row has a file;
+ *   - every pipe table in a chapter is followed by a ": Caption {#tbl-id}" line;
+ *   - no unfilled [[TOKEN]] is left in the spine or a chapter;
+ *   - no `<!-- Template:` marker is left in the spine or a chapter: the starter text under it is
+ *     sample prose that nobody has confirmed;
+ *   - `quarto render` exits 0 and prints no warning.
+ */
 
 import { quartoCommand } from "./quarto.ts";
 
@@ -31,16 +33,22 @@ const TEMPLATE_MARKER = "<!-- Template:";
 const RENDER_WARNING = /\bwarn(ing)?\b/i;
 const ANSI = /\u001b\[[0-9;]*[A-Za-z]/g;
 
+/** One line of output: an ERROR fails the check, a WARN does not. */
 interface Problem {
   level: "ERROR" | "WARN";
   text: string;
 }
 
+/** Records a problem for the final report. */
 type Add = (level: Problem["level"], text: string) => void;
 
+/** The parsed command line. */
 interface Options {
+  /** The guide folder, without a trailing separator. */
   docs: string;
+  /** Whether `--draft` was given. */
   draft: boolean;
+  /** False when `--no-render` was given. */
   render: boolean;
 }
 
@@ -49,6 +57,11 @@ function oneLine(text: string): string {
   return text.replace(/\s+/g, " ").trim();
 }
 
+/**
+ * Parses the command line into options.
+ *
+ * @throws Error when an argument is unknown, or `--docs` has no value or is missing.
+ */
 function parseArgs(argv: string[]): Options {
   let docs: string | undefined;
   let draft = false;
@@ -70,6 +83,11 @@ function parseArgs(argv: string[]): Options {
   return { docs: docs.replace(/[\\/]+$/, "") || docs, draft, render };
 }
 
+/**
+ * Reads a text file, or returns undefined when it does not exist.
+ *
+ * @throws Any read error other than a missing file.
+ */
 async function readIfExists(path: string): Promise<string | undefined> {
   try {
     return await Deno.readTextFile(path);
@@ -79,6 +97,13 @@ async function readIfExists(path: string): Promise<string | undefined> {
   }
 }
 
+/**
+ * Lists the names of the files directly inside `dir` that `keep` accepts, in code-unit order
+ * rather than locale order. Subfolders are skipped, and a folder that does not exist gives an
+ * empty list.
+ *
+ * @throws Any read error other than a missing folder.
+ */
 async function namesIn(dir: string, keep: (name: string) => boolean): Promise<string[]> {
   const names: string[] = [];
   try {
@@ -91,16 +116,21 @@ async function namesIn(dir: string, keep: (name: string) => boolean): Promise<st
   return names.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 }
 
+/** Splits text into lines on LF or CRLF. */
 function linesOf(text: string): string[] {
   return text.split(/\r?\n/);
 }
 
-/** Splits a table row on its unescaped pipes and trims the cells. */
+/** Splits a table row on its unescaped pipes, ignoring the outer ones, and trims the cells. */
 function cells(row: string): string[] {
   return row.replace(/^\|/, "").replace(/\|$/, "").split(/(?<!\\)\|/).map((c) => c.trim());
 }
 
-/** Flags each line that sits inside a fenced code block, the fences themselves included. */
+/**
+ * Flags each line that sits inside a fenced code block, the fences themselves included.
+ *
+ * @returns One flag per entry of `lines`, in the same order.
+ */
 function codeLines(lines: string[]): boolean[] {
   const inCode: boolean[] = [];
   let fence: { char: string; length: number } | undefined;
@@ -121,11 +151,16 @@ function codeLines(lines: string[]): boolean[] {
   return inCode;
 }
 
+/** Returns whether a line is the `| --- | :---: |` row that separates a pipe table's header. */
 function isDelimiterRow(line: string): boolean {
   return line.includes("|") && /^ {0,3}\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$/.test(line);
 }
 
-/** The 1-based line of the header row of each pipe table that has no `: Caption {#tbl-…}` line. */
+/**
+ * Returns the 1-based line of the header row of each pipe table that has no
+ * `: Caption {#tbl-…}` line. Tables inside fenced code are ignored; the caption may follow blank
+ * lines and may wrap, but the `{#tbl-` id must be in it.
+ */
 function uncaptionedTables(lines: string[]): number[] {
   const inCode = codeLines(lines);
   const found: number[] = [];
@@ -133,6 +168,7 @@ function uncaptionedTables(lines: string[]): number[] {
     if (inCode[i] || inCode[i + 1] || !lines[i].includes("|") || !isDelimiterRow(lines[i + 1])) {
       continue;
     }
+    /** Whether line `n` continues the table: outside code, not blank, and holding a pipe. */
     const isRow = (n: number) =>
       n < lines.length && !inCode[n] && lines[n].trim() !== "" && lines[n].includes("|");
     let end = i + 2;
@@ -152,6 +188,14 @@ function uncaptionedTables(lines: string[]): number[] {
   return found;
 }
 
+/**
+ * Reports each unfilled `[[TOKEN]]` and each `<!-- Template:` marker in the spine or a chapter,
+ * and, for a chapter, each pipe table without a caption.
+ *
+ * @param file - The name shown in messages, relative to the guide folder.
+ * @param isChapter - Whether table captions are checked, which they are for chapters only.
+ * @param draft - Reports template markers as warnings; an unfilled token is an error either way.
+ */
 function checkText(
   file: string,
   text: string,
@@ -178,6 +222,14 @@ function checkText(
   }
 }
 
+/**
+ * Checks images/IMAGES.md against the files in images/: every row is well formed with a status of
+ * "captured" or "placeholder: <why>", every row has a file, and every picture file has a row.
+ * Reports one error and checks nothing else when IMAGES.md is missing.
+ *
+ * @param docs - The guide folder.
+ * @param draft - Reports pictures still marked placeholder as warnings instead of errors.
+ */
 async function checkImages(docs: string, draft: boolean, add: Add): Promise<void> {
   const md = await readIfExists(`${docs}/images/IMAGES.md`);
   if (md === undefined) {
@@ -225,7 +277,11 @@ async function checkImages(docs: string, draft: boolean, add: Add): Promise<void
   }
 }
 
-/** The lines `quarto render` printed, without colour codes or the options it echoes first. */
+/**
+ * Returns the lines `quarto render` printed, without colour codes or the options it echoes first.
+ *
+ * @param output - Its standard output and standard error, joined.
+ */
 function renderLines(output: string): string[] {
   const kept: string[] = [];
   let echo = false;
@@ -238,6 +294,11 @@ function renderLines(output: string): string[] {
   return kept;
 }
 
+/**
+ * Runs `quarto render` on the spine and reports every line that mentions a warning, and, when it
+ * exits non-zero, the failure with its reasons. Reports one error instead when Quarto cannot be
+ * started. Every render problem is an error, in draft mode too.
+ */
 async function checkRender(docs: string, add: Add): Promise<void> {
   const quarto = quartoCommand();
   let result: Deno.CommandOutput;
@@ -256,6 +317,7 @@ async function checkRender(docs: string, add: Add): Promise<void> {
   const lines = renderLines(`${decoder.decode(result.stdout)}\n${decoder.decode(result.stderr)}`)
     .filter((line) => line.trim() !== "");
   const echoed = new Set<string>();
+  /** Adds `line` as an error unless it was already reported, with the `strip` prefix removed. */
   const report = (line: string, strip: RegExp) => {
     if (echoed.has(line)) return;
     echoed.add(line);
@@ -273,7 +335,13 @@ async function checkRender(docs: string, add: Add): Promise<void> {
   }
 }
 
-/** Runs the checks, prints the problems, and returns the process exit code. */
+/**
+ * Runs the checks, prints the problems, and returns the process exit code.
+ *
+ * @returns 1 if any problem is an ERROR, else 0.
+ * @throws Error when the command line is bad or a file cannot be read; the entry point below
+ * prints it as one `ERROR:` line.
+ */
 async function main(argv: string[]): Promise<number> {
   const options = parseArgs(argv);
   const problems: Problem[] = [];

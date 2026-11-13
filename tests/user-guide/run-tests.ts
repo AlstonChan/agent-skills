@@ -1,8 +1,13 @@
-// Runs every *.test.ts beside this file. Each exports `tests: Record<string, () => Promise<void>>`.
-//
-//   quarto run tests/user-guide/run-tests.ts [name-fragment ...]
-//
-// With fragments, only test files whose name contains one of them run.
+/**
+ * @file Runs every *.test.ts beside this file. Each exports
+ * `tests: Record<string, () => Promise<void>>`.
+ *
+ * Usage: quarto run tests/user-guide/run-tests.ts [name-fragment ...]
+ *
+ * With fragments, only test files whose name contains one of them run. Prints PASS or FAIL per
+ * test and a final count, and exits 1 on a failure or when no test ran. A failing run keeps its
+ * test folders and prints where; a passing run removes them.
+ */
 
 import { testRoot } from "./helpers.ts";
 

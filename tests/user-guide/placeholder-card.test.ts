@@ -1,3 +1,9 @@
+/**
+ * @file Pins placeholder-card.ts by running it for real: the card's size and byte-for-byte
+ * stability, the IMAGES.md row it writes (escaping, replacing, appending, line endings), where the
+ * capture text comes from, and that a bad argument or a Typst warning leaves every file untouched.
+ */
+
 import { assert, assertEquals, newTestDir, pngSize, runScript, skillDir } from "./helpers.ts";
 
 const script = `${skillDir}/scripts/placeholder-card.ts`;
@@ -5,6 +11,7 @@ const script = `${skillDir}/scripts/placeholder-card.ts`;
 const HEADER = "| File | Section | Shows | How to get there | Status |";
 const RULE = "| :--- | :--- | :--- | :--- | :--- |";
 
+/** The arguments of one run of the script; `capture` is optional, as IMAGES.md can supply it. */
 interface Card {
   file: string;
   section: string;
@@ -14,6 +21,7 @@ interface Card {
   capture?: string;
 }
 
+/** Returns a complete, valid set of arguments, with any field replaced from `overrides`. */
 function card(overrides: Partial<Card> = {}): Card {
   return {
     file: "01-main-window.png",
@@ -26,6 +34,12 @@ function card(overrides: Partial<Card> = {}): Card {
   };
 }
 
+/**
+ * Runs the script for `c` against the guide folder `docs`, passing `--capture` only when `c` has
+ * one.
+ *
+ * @returns The exit code and output, unchecked.
+ */
 function generate(docs: string, c: Card) {
   const args = [
     "--docs", docs,
@@ -39,11 +53,17 @@ function generate(docs: string, c: Card) {
   return runScript(script, args);
 }
 
+/**
+ * Runs the script for `c` and fails the test unless it exits 0.
+ *
+ * @throws Error with the script's stderr when the exit code is not 0.
+ */
 async function generateOk(docs: string, c: Card): Promise<void> {
   const result = await generate(docs, c);
   assertEquals(0, result.code, `exit code of ${c.file} (stderr: ${result.stderr.trim()})`);
 }
 
+/** Returns whether a file or folder is at `path`. */
 async function exists(path: string): Promise<boolean> {
   try {
     await Deno.stat(path);
@@ -53,10 +73,12 @@ async function exists(path: string): Promise<boolean> {
   }
 }
 
+/** Reads the IMAGES.md of the guide folder `docs`. */
 function imagesMd(docs: string): Promise<string> {
   return Deno.readTextFile(`${docs}/images/IMAGES.md`);
 }
 
+/** Returns the picture rows of an IMAGES.md: the lines that open with a backticked file name. */
 function rows(text: string): string[] {
   return text.split(/\r?\n/).filter((line) => line.startsWith("| `"));
 }
@@ -66,6 +88,7 @@ function cells(row: string): string[] {
   return row.replace(/^\|/, "").replace(/\|$/, "").split(/(?<!\\)\|/).map((c) => c.trim());
 }
 
+/** Test cases run by run-tests.ts, keyed by name. */
 export const tests: Record<string, () => Promise<void>> = {
   "card is written and row added": async () => {
     const docs = await newTestDir("card-written");

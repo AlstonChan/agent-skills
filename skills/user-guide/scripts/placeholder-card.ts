@@ -1,17 +1,19 @@
-// Draws the standard "REPLACE ME" card for a screenshot that has not been taken yet and records
-// it in docs/images/IMAGES.md.
-//
-//   quarto run placeholder-card.ts --docs <dir> --file <name.png> --section <sec-id>
-//       --shows <text> --how <text> --why <text> [--capture <text>]
-//
-// Writes <dir>/images/<name.png> and upserts that picture's row in <dir>/images/IMAGES.md.
-// --capture defaults to the "Capture it:" line of IMAGES.md; a new IMAGES.md needs it.
-// Exits 0 on success; on failure exits 1 with one message line on stderr.
-//
-// A warning from Typst counts as a failure. The usual one is an unknown font: Typst then falls
-// back to another face and still exits 0, so cards would quietly stop matching each other. The
-// card is drawn in a scratch folder and copied out only when Typst printed no warning, so a
-// refused run leaves the image and IMAGES.md exactly as they were.
+/**
+ * @file Draws the standard "REPLACE ME" card for a screenshot that has not been taken yet and
+ * records it in docs/images/IMAGES.md.
+ *
+ * Usage: quarto run placeholder-card.ts --docs <dir> --file <name.png> --section <sec-id>
+ *     --shows <text> --how <text> --why <text> [--capture <text>]
+ *
+ * Writes `<dir>/images/<name.png>` and upserts that picture's row in `<dir>/images/IMAGES.md`.
+ * `--capture` defaults to the "Capture it:" line of IMAGES.md; a new IMAGES.md needs it.
+ * Exits 0 on success; on failure exits 1 with one message line on stderr.
+ *
+ * A warning from Typst counts as a failure. The usual one is an unknown font: Typst then falls
+ * back to another face and still exits 0, so cards would quietly stop matching each other. The
+ * card is drawn in a scratch folder and copied out only when Typst printed no warning, so a
+ * refused run leaves the image and IMAGES.md exactly as they were.
+ */
 
 import { quartoCommand } from "./quarto.ts";
 
@@ -29,6 +31,13 @@ function oneLine(text: string): string {
   return text.replace(/\s+/g, " ").trim();
 }
 
+/**
+ * Parses the `--name value` pairs into a record keyed by flag name. Every value but the two paths
+ * (`docs` and `file`) is collapsed onto one line.
+ *
+ * @throws Error when a flag is unknown or has no value, a required flag is missing or empty, or
+ * `--file` is not a plain file name ending in .png.
+ */
 function parseArgs(argv: string[]): Record<string, string> {
   const known: readonly string[] = [...REQUIRED, ...OPTIONAL];
   const values: Record<string, string> = {};
@@ -50,13 +59,21 @@ function parseArgs(argv: string[]): Record<string, string> {
   return values;
 }
 
-/** The text after "Capture it:", or null when the line is missing, empty or still a template slot. */
+/**
+ * Returns the text after "Capture it:", or null when the line is missing, empty or still a
+ * template slot.
+ */
 function captureFrom(imagesMd: string | undefined): string | null {
   const match = /^Capture it:[ \t]*(.*?)[ \t]*\r?$/m.exec(imagesMd ?? "");
   if (!match || match[1] === "" || match[1].includes("[[")) return null;
   return match[1];
 }
 
+/**
+ * Reads a text file, or returns undefined when it does not exist.
+ *
+ * @throws Any read error other than a missing file.
+ */
 async function readIfExists(path: string): Promise<string | undefined> {
   try {
     return await Deno.readTextFile(path);
@@ -66,12 +83,23 @@ async function readIfExists(path: string): Promise<string | undefined> {
   }
 }
 
-/** The first line of Typst's output that opens a warning, or undefined when it printed none. */
+/**
+ * Returns the first line of Typst's output that opens a warning, or undefined when it printed
+ * none.
+ */
 function typstWarning(stderr: string): string | undefined {
   return stderr.replace(ANSI, "").split(/\r?\n/).find((line) => /^\s*warning\b/i.test(line))
     ?.trim();
 }
 
+/**
+ * Draws one placeholder card with Typst and copies it to `<imagesDir>/<card.file>`, creating the
+ * folder if needed. The drawing happens in a scratch folder that is always removed, so a failed
+ * run writes nothing.
+ *
+ * @param card - The picture's file name and the texts printed on the card.
+ * @throws Error when Quarto cannot be started, Typst fails, or Typst prints a warning.
+ */
 async function drawCard(
   imagesDir: string,
   card: { file: string; shows: string; how: string; capture: string },
@@ -116,6 +144,9 @@ async function drawCard(
 /**
  * Returns IMAGES.md with `row` added, or replacing the row for the same file. Lines keep the
  * ending they had; lines added take the ending of their neighbour, and a new file uses LF.
+ *
+ * @param existing - The current IMAGES.md text; undefined or blank starts a new file.
+ * @param capture - The "Capture it:" text, written only when a new file is started.
  */
 function upsertRow(
   existing: string | undefined,
@@ -129,6 +160,7 @@ function upsertRow(
   }
 
   const lines: string[] = existing.match(/[^\n]*\n|[^\n]+$/g) ?? [];
+  /** Returns the ending of `line`: CRLF, LF, or empty for a last line that has none. */
   const endingOf = (line: string) =>
     line.endsWith("\r\n") ? "\r\n" : line.endsWith("\n") ? "\n" : "";
   const fileEnding = /\r?\n/.exec(existing)?.[0] ?? "\n";
@@ -155,6 +187,13 @@ function upsertRow(
   return lines.join("");
 }
 
+/**
+ * Draws the card, then writes its row to IMAGES.md; IMAGES.md is touched only after the card was
+ * written.
+ *
+ * @throws Error on bad arguments, when no "Capture it:" text can be found, or when the card cannot
+ * be drawn; the entry point below prints it on one stderr line and exits 1.
+ */
 async function main(argv: string[]): Promise<void> {
   const args = parseArgs(argv);
   const docs = args.docs.replace(/[\\/]+$/, "");
@@ -176,6 +215,7 @@ async function main(argv: string[]): Promise<void> {
     capture,
   });
 
+  /** Escapes the pipes in a value so it stays inside one table cell. */
   const cell = (text: string) => text.replace(/\|/g, "\\|");
   const row = `| \`${args.file}\` | ${cell(args.section)} | ${cell(args.shows)} | ` +
     `${cell(args.how)} | placeholder: ${cell(args.why)} |`;

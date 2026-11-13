@@ -1,9 +1,17 @@
+/**
+ * @file Pins the starter templates under skills/user-guide/templates: filled with sample values
+ * and given a card per picture they render clean, and fail a release check while cards and
+ * markers remain; each carries exactly one sample-text marker, uses only the documented tokens,
+ * and no skill file names a UI stack.
+ */
+
 import { assert, assertEquals, newTestDir, runQuarto, runScript, skillDir } from "./helpers.ts";
 
 const templates = `${skillDir}/templates`;
 const cardScript = `${skillDir}/scripts/placeholder-card.ts`;
 const checkScript = `${skillDir}/scripts/check-guide.ts`;
 
+/** The documented tokens, each with the sample value the tests fill it with. */
 const TOKENS: Record<string, string> = {
   "[[APP_NAME]]": "Sample Viewer",
   "[[COMPANY]]": "Sample Co",
@@ -20,6 +28,12 @@ const MARKER = "<!-- Template:";
 /** A UI stack no skill file may name: the skill and its templates fit any desktop app. */
 const PRODUCT_NAMES = /wpf/i;
 
+/**
+ * Lists every file below `root/dir`, subfolders included, sorted.
+ *
+ * @param dir - A folder inside `root` to start from; empty means `root` itself.
+ * @returns Paths relative to `root`, with `/` separators.
+ */
 async function filesUnder(root: string, dir = ""): Promise<string[]> {
   const found: string[] = [];
   for await (const entry of Deno.readDir(`${root}/${dir}`)) {
@@ -45,7 +59,10 @@ async function copyFilled(to: string): Promise<void> {
   }
 }
 
-/** Every picture the filled chapters point at, with the section its figure sits under. */
+/**
+ * Returns every picture the filled chapters point at, with the `sec-` id of the heading its figure
+ * sits under, or an empty string when it sits under none.
+ */
 async function referencedImages(docs: string): Promise<Map<string, string>> {
   const found = new Map<string, string>();
   for (const file of await filesUnder(`${docs}/_chapters`)) {
@@ -60,7 +77,11 @@ async function referencedImages(docs: string): Promise<Map<string, string>> {
   return found;
 }
 
-/** The templates that carry a sample-text marker: the spine and every chapter. */
+/**
+ * Returns the templates that carry a sample-text marker: the spine and every chapter.
+ *
+ * @returns Paths relative to the templates folder.
+ */
 async function markedTemplates(): Promise<string[]> {
   const chapters = (await filesUnder(`${templates}/_chapters`)).map((name) => `_chapters/${name}`);
   return ["user-guide.qmd", ...chapters];
@@ -68,7 +89,12 @@ async function markedTemplates(): Promise<string[]> {
 
 let built: Promise<string> | undefined;
 
-/** The templates filled in and given a card per referenced picture, built once for every test. */
+/**
+ * Returns the guide folder holding the templates filled in and given a card per referenced
+ * picture. It is built once and shared by every test, so a test must not change it.
+ *
+ * @throws Error when the templates reference a different set of pictures than the three expected.
+ */
 function filledGuide(): Promise<string> {
   built ??= (async () => {
     const docs = `${await newTestDir("templates")}/docs`;
@@ -98,6 +124,10 @@ function filledGuide(): Promise<string> {
   return built;
 }
 
+/**
+ * Runs check-guide.ts on `docs` with the extra `flags`, and sorts its output lines into `errors`
+ * and `warnings` beside the raw result.
+ */
 async function check(docs: string, ...flags: string[]) {
   const result = await runScript(checkScript, ["--docs", docs, ...flags]);
   const lines = result.stdout.split(/\r?\n/).filter((line) => line.trim() !== "");
@@ -108,6 +138,7 @@ async function check(docs: string, ...flags: string[]) {
   };
 }
 
+/** Test cases run by run-tests.ts, keyed by name. */
 export const tests: Record<string, () => Promise<void>> = {
   "templates render clean": async () => {
     const docs = await filledGuide();

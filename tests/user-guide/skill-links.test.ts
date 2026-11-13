@@ -1,3 +1,8 @@
+/**
+ * @file Pins SKILL.md's links: the front matter is well formed, every relative link resolves to a
+ * file inside the skill folder, none climbs out of it, and every file under references/ is linked.
+ */
+
 import { assert, skillDir } from "./helpers.ts";
 
 const skillFile = `${skillDir}/SKILL.md`;
@@ -5,6 +10,11 @@ const skillFile = `${skillDir}/SKILL.md`;
 /** Markdown link targets: `[text](target)`, without a `#fragment` or a `"title"`. */
 const LINK = /\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
 
+/**
+ * Returns whether a file or folder is at `path`.
+ *
+ * @throws Any stat error other than not-found.
+ */
 async function exists(path: string): Promise<boolean> {
   try {
     await Deno.stat(path);
@@ -16,8 +26,11 @@ async function exists(path: string): Promise<boolean> {
 }
 
 /**
- * The link target as a path inside the skill folder, with `.` and `..` segments resolved, or
- * undefined when it is absolute or climbs out of the skill folder.
+ * Returns the link target as a path inside the skill folder, with `.` and `..` segments resolved,
+ * or undefined when it is absolute or climbs out of the skill folder.
+ *
+ * @param target - A link target with no `#fragment`; either kind of slash is a separator.
+ * @returns The resolved path with `/` separators.
  */
 function insideSkill(target: string): string | undefined {
   if (/^[\\/]/.test(target)) return undefined;
@@ -34,7 +47,11 @@ function insideSkill(target: string): string | undefined {
   return kept.length === 0 ? undefined : kept.join("/");
 }
 
-/** The YAML front matter's lines, between the opening and closing `---`. */
+/**
+ * Returns the YAML front matter's lines, between the opening and closing `---`.
+ *
+ * @throws Error when the text does not open with `---` or the front matter is never closed.
+ */
 function frontMatter(text: string): string[] {
   const lines = text.split(/\r?\n/);
   assert(lines[0] === "---", "SKILL.md does not open with a --- front matter line");
@@ -43,6 +60,7 @@ function frontMatter(text: string): string[] {
   return lines.slice(1, end);
 }
 
+/** Test cases run by run-tests.ts, keyed by name. */
 export const tests: Record<string, () => Promise<void>> = {
   "every link in SKILL.md resolves": async () => {
     const text = await Deno.readTextFile(skillFile);
