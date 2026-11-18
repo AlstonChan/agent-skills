@@ -69,7 +69,7 @@ quarto run <skill>/scripts/placeholder-card.ts --docs docs --file 02-library-sea
 | :--- | :--- |
 | `--docs` | The guide's folder: `docs` |
 | `--file` | The picture's plain `.png` name, as the figure uses it |
-| `--section` | The id of the nearest heading above the picture that has one, without `#` |
+| `--section` | The id of the heading the picture sits under, without `#`; give that heading one if it has none |
 | `--shows` | What the picture must show |
 | `--how` | The steps in the app to reach that screen, on one line |
 | `--why` | `new picture`, or `stale: <what changed>` |
@@ -112,7 +112,7 @@ the owner can take them in one sitting:
 Cards waiting (2):
 - 02-library-search.png (sec-library-search): The Library list narrowed by Search.
   Open Sample Viewer, choose Library, type tile in Search.
-- 90-settings.png (sec-settings): The settings window. Choose Settings in the menu bar.
+- 90-settings.png (sec-settings-open): The settings window. Choose Settings in the menu bar.
 Take each with the Capture it line in docs/images/IMAGES.md, save it over the card,
 and change its Status to captured.
 ```

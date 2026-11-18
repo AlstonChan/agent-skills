@@ -19,6 +19,7 @@
  *   - every picture file has a row, and every row has a file;
  *   - every picture with a row is used by a chapter;
  *   - every picture a chapter uses carries that chapter file's prefix (a warning only);
+ *   - every picture sits under a heading with an id, callout titles not counted;
  *   - every pipe table in a chapter is followed by a ": Caption {#tbl-id}" line;
  *   - no unfilled [[TOKEN]] is left in the spine or a chapter;
  *   - no `<!-- Template:` marker is left in the spine or a chapter: the starter text under it is
@@ -229,21 +230,40 @@ function checkText(
 
 /**
  * Returns, for each picture file name a chapter points at outside fenced code, the chapter files
- * that point at it.
+ * that point at it. Reports each picture whose heading has no id, as an error: its IMAGES.md row
+ * names the section by that id.
  *
  * @param chapters - Each chapter's file name and text.
  */
-function picturesUsed(chapters: { name: string; text: string }[]): Map<string, string[]> {
+function picturesUsed(
+  chapters: { name: string; text: string }[],
+  add: Add,
+): Map<string, string[]> {
   const used = new Map<string, string[]>();
   for (const { name, text } of chapters) {
     const lines = linesOf(text);
     const inCode = codeLines(lines);
+    const divs: boolean[] = [];
+    let heading: { text: string; id: boolean } | undefined;
     lines.forEach((line, index) => {
       if (inCode[index]) return;
+      if (/^:::+\s*\{/.test(line)) divs.push(/\.callout/.test(line));
+      else if (/^:::+\s*$/.test(line)) divs.pop();
+      const title = /^#{1,6}\s+(.*?)\s*$/.exec(line);
+      if (title && !divs.includes(true)) {
+        heading = { text: title[1].replace(/\s*\{[^}]*\}$/, ""), id: /\{#[^}\s]+/.test(title[1]) };
+      }
       for (const match of line.matchAll(IMAGE_USE)) {
         const users = used.get(match[1]) ?? [];
         if (!users.includes(name)) users.push(name);
         used.set(match[1], users);
+        if (heading !== undefined && !heading.id && IMAGE_FILE.test(match[1])) {
+          add(
+            "ERROR",
+            `_chapters/${name}:${index + 1}: images/${match[1]} sits under "${heading.text}", ` +
+              "which has no id; give that heading one ({#sec-…}) for its IMAGES.md row to name",
+          );
+        }
       }
     });
   }
@@ -263,10 +283,11 @@ function checkPrefixes(used: Map<string, string[]>, add: Add): void {
     const rename = own === undefined
       ? `${prefixes[0]}-${file}`
       : file.replace(PREFIX, `${prefixes[0]}-`);
+    const chapter = users.length === 1 ? "its chapter" : "any chapter that uses it";
     add(
       "WARN",
-      `images/${file} is used by _chapters/${users.join(", _chapters/")} but named for none of ` +
-        `them; rename it ${rename}, with its figure and its IMAGES.md row`,
+      `images/${file} is not named for ${chapter} (_chapters/${users.join(", _chapters/")}); ` +
+        `rename it ${rename}, with its figure and its IMAGES.md row`,
     );
   }
 }
@@ -417,7 +438,7 @@ async function main(argv: string[]): Promise<number> {
     for (const name of await namesIn(`${options.docs}/_chapters`, (n) => n.endsWith(".md"))) {
       chapters.push({ name, text: await Deno.readTextFile(`${options.docs}/_chapters/${name}`) });
     }
-    const used = picturesUsed(chapters);
+    const used = picturesUsed(chapters, add);
 
     await checkImages(options.docs, used, options.draft, add);
     checkPrefixes(used, add);

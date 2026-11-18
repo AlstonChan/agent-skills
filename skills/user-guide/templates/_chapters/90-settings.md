@@ -5,7 +5,7 @@
 The settings decide how [[APP_NAME]] looks and behaves on this computer. Change them when the
 defaults do not suit the way you work; nothing here alters your data.
 
-## Open the settings window
+## Open the settings window {#sec-settings-open}
 
 1. Choose **Settings** in the menu bar.
 2. Select the page you want from the list on the left.

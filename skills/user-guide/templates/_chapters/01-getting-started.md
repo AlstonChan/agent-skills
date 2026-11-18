@@ -6,7 +6,7 @@ This chapter takes you from opening [[APP_NAME]] to finishing your first task. R
 chapters after it describe each part of the program in detail, and the appendices at the back
 explain its terms and what to do when something goes wrong (@sec-troubleshooting).
 
-## Start the program
+## Start the program {#sec-getting-started-start}
 
 1. Open **[[APP_NAME]]** from the Start menu or its desktop shortcut.
 2. If a sign-in window appears, enter your user name and password and press **Log In**.

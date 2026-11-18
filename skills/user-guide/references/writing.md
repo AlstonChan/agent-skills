@@ -43,8 +43,11 @@ docs/_chapters/
 
 ## Ids
 
-- **Every chapter heading and every section a link may point at gets an id**: `sec-` plus the
-  area id plus the section in lowercase words joined by `-`. `## Search the Library {#sec-library-search}`.
+- **Every chapter heading, every section a link may point at, and every heading a picture sits
+  under gets an id**: `sec-` plus the area id plus the section in lowercase words joined by `-`.
+  `## Search the Library {#sec-library-search}`. A picture's `IMAGES.md` row names its section by
+  that id, and the check fails on a picture under a heading without one; a callout's title does
+  not count as the picture's heading.
 - **Figures and tables use the same stem**: `#fig-library-search`, `#tbl-library-controls`.
 - **An id goes on a plain heading**, never inside a `:::` callout ([quarto.md](quarto.md)).
 

@@ -211,6 +211,36 @@ export const tests: Record<string, () => Promise<void>> = {
     assertEquals([], shared.warnings, "a picture named for one of the chapters using it");
   },
 
+  "a picture under a heading without an id fails, a callout title does not count": async () => {
+    const docs = await buildGuide("check-heading-id");
+    const chapter = `${docs}/_chapters/01-getting-started.md`;
+    const figure = "![The main window.](images/01-main-window.png){#fig-main}";
+    const callout = [
+      "## Find the main window {#sec-getting-started-window}",
+      "",
+      "::: {.callout-note}",
+      "## Nothing to set up",
+      "",
+      "The window opens by itself.",
+      ":::",
+      "",
+      figure,
+      "",
+    ].join("\n");
+    await Deno.writeTextFile(chapter, CHAPTER.replace(figure, callout));
+    const clean = await check(docs, "--no-render");
+    assertEquals(0, clean.code, `a callout title is not the picture's heading (${describe(clean)})`);
+
+    await Deno.writeTextFile(chapter, CHAPTER.replace(figure, `## The window\n\n${figure}`));
+    const result = await check(docs, "--draft", "--no-render");
+    assertEquals(1, result.code, `exit code, --draft included (${describe(result)})`);
+    assertEquals(1, result.errors.length, `ERROR lines: ${result.errors.join(" / ")}`);
+    assert(
+      result.errors[0].includes('"The window"') && result.errors[0].includes("01-main-window.png"),
+      `names the heading and the picture: ${result.errors[0]}`,
+    );
+  },
+
   "a missing IMAGES.md names the template": async () => {
     const docs = await buildGuide("check-no-images-md");
     await Deno.remove(`${docs}/images/IMAGES.md`);

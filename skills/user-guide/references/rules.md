@@ -41,8 +41,9 @@ file per chapter in `docs/_chapters/`, every picture in `docs/images/`.
   renumbered renames its pictures with it; the check warns about a picture named for no chapter
   that uses it.
 - **`docs/images/IMAGES.md` lists every picture**, one row each, with status `captured` or
-  `placeholder: <why>`. A picture used in more than one section lists each id in its Section cell,
-  separated by commas. A picture with no row, a row with no picture, or a picture no chapter uses
+  `placeholder: <why>`. Its Section cell is the id of the heading the picture sits under, which
+  gets one if it has none; a picture used in more than one section lists each id, separated by
+  commas. A picture with no row, a row with no picture, or a picture no chapter uses
   fails the check:
 
   ```text
