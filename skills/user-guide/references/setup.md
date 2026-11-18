@@ -234,7 +234,8 @@ the user guide"). That needs app code, so set it up only when the owner asks for
 ## 12. Offer the rules
 
 Offer to copy the section in [rules.md](rules.md) into the project's `CLAUDE.md` or `AGENTS.md`,
-so later changes keep the guide right.
+so later changes keep the guide right, pasted the way that file says: the check pointed at the
+project's copy from step 10, never at the skill's install path.
 
 ## Bringing an existing guide under the rules
 

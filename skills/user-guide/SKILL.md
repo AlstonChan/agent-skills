@@ -128,5 +128,6 @@ exists and a change alters what a user sees; **adopt** when a Quarto guide exist
 ## Offer the rules
 
 Offer to paste the `## User guide` section of [references/rules.md](references/rules.md) into the
-project's `CLAUDE.md` or `AGENTS.md`, with every `<skill>` replaced by the real path of the folder
-this skill is installed in, so later changes keep the guide right. Edit the file only on a yes.
+project's `CLAUDE.md` or `AGENTS.md`, so later changes keep the guide right, pasted the way
+[references/rules.md](references/rules.md) says: the check pointed at the project's own copy, never
+at this skill's install path, which changes with every version. Edit the file only on a yes.

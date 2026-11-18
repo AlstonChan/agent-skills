@@ -3,10 +3,17 @@
 The rules an end-user guide obeys on every change, not only when the skill runs. Copy the section
 below into the repository's `CLAUDE.md` or `AGENTS.md`, so it stands on its own there.
 
-When pasting, replace every `<skill>` in it with the real path of the folder the `user-guide`
-skill is installed in, so an agent that never loaded the skill can run the commands. Both commands
-run from the installed skill; a project copy of `check-guide.ts` for CI (see
-[setup.md](setup.md)) does not change them.
+Never paste the skill's install path: it carries the plugin's version and breaks on the next
+update. When pasting:
+
+- **The check** runs from the project's own copy once there is one
+  ([setup.md](setup.md), step 10): replace `<skill>/scripts/check-guide.ts` with that path,
+  `build/user-guide/check-guide.ts`.
+- **The card** runs only from the installed skill. Keep `<skill>` in its command and add, under the
+  heading, "`<skill>` is the folder of the installed `user-guide` skill; load the skill to find
+  it."
+- **Add what the project's guide holds that the section does not**: its chapter layout when it
+  was adopted with its own numbering, the code that links into the guide, its capture shortcut.
 
 ## User guide
 
