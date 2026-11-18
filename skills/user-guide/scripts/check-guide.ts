@@ -7,15 +7,18 @@
  * Prints one line per problem, "ERROR: <text>" or "WARN: <text>", after collecting all of them,
  * and exits 1 if any line is an ERROR, else 0. Prints nothing when the guide is clean.
  *
- * `--draft` turns pictures still marked placeholder and template markers still in the text from
- * errors into warnings, for a guide that is not being released yet. `--no-render` skips
- * `quarto render`, which is the slow check.
+ * `--draft` turns pictures still marked placeholder, pictures no chapter uses yet and template
+ * markers still in the text from errors into warnings, for a guide that is not being released yet.
+ * `--no-render` skips `quarto render`, which is the slow check. A picture named for another
+ * chapter is a warning with or without `--draft`.
  *
  * Checks:
  *   - user-guide.qmd exists (when it does not, that is the only line);
  *   - images/IMAGES.md exists (when it does not, the picture checks are skipped);
  *   - no picture is still marked placeholder;
  *   - every picture file has a row, and every row has a file;
+ *   - every picture with a row is used by a chapter;
+ *   - every picture a chapter uses carries that chapter file's prefix (a warning only);
  *   - every pipe table in a chapter is followed by a ": Caption {#tbl-id}" line;
  *   - no unfilled [[TOKEN]] is left in the spine or a chapter;
  *   - no `<!-- Template:` marker is left in the spine or a chapter: the starter text under it is
@@ -30,6 +33,8 @@ const SPINE = "user-guide.qmd";
 const IMAGE_FILE = /\.(png|jpe?g|gif|svg|webp)$/i;
 const TOKEN = /\[\[[^\[\]\r\n]+\]\]/g;
 const TEMPLATE_MARKER = "<!-- Template:";
+const IMAGE_USE = /(?<![\w./-])images\/([A-Za-z0-9._-]+)/g;
+const PREFIX = /^([A-Za-z0-9]+)-/;
 const RENDER_WARNING = /\bwarn(ing)?\b/i;
 const ANSI = /\u001b\[[0-9;]*[A-Za-z]/g;
 
@@ -223,20 +228,72 @@ function checkText(
 }
 
 /**
- * Checks images/IMAGES.md against the files in images/: every row is well formed with a status of
- * "captured" or "placeholder: <why>", every row has a file, and every picture file has a row.
- * Reports one error and checks nothing else when IMAGES.md is missing.
+ * Returns, for each picture file name a chapter points at outside fenced code, the chapter files
+ * that point at it.
+ *
+ * @param chapters - Each chapter's file name and text.
+ */
+function picturesUsed(chapters: { name: string; text: string }[]): Map<string, string[]> {
+  const used = new Map<string, string[]>();
+  for (const { name, text } of chapters) {
+    const lines = linesOf(text);
+    const inCode = codeLines(lines);
+    lines.forEach((line, index) => {
+      if (inCode[index]) return;
+      for (const match of line.matchAll(IMAGE_USE)) {
+        const users = used.get(match[1]) ?? [];
+        if (!users.includes(name)) users.push(name);
+        used.set(match[1], users);
+      }
+    });
+  }
+  return used;
+}
+
+/**
+ * Warns about each picture that carries the prefix of no chapter using it, naming the name it
+ * should have: a chapter file renumbered without its pictures leaves them on the old number.
+ */
+function checkPrefixes(used: Map<string, string[]>, add: Add): void {
+  for (const [file, users] of used) {
+    if (!IMAGE_FILE.test(file)) continue;
+    const prefixes = users.flatMap((user) => PREFIX.exec(user)?.[1] ?? []);
+    const own = PREFIX.exec(file)?.[1];
+    if (prefixes.length === 0 || (own !== undefined && prefixes.includes(own))) continue;
+    const rename = own === undefined
+      ? `${prefixes[0]}-${file}`
+      : file.replace(PREFIX, `${prefixes[0]}-`);
+    add(
+      "WARN",
+      `images/${file} is used by _chapters/${users.join(", _chapters/")} but named for none of ` +
+        `them; rename it ${rename}, with its figure and its IMAGES.md row`,
+    );
+  }
+}
+
+/**
+ * Checks images/IMAGES.md against the files in images/ and the pictures the chapters use: every
+ * row is well formed with a status of "captured" or "placeholder: <why>", every row has a file,
+ * every picture file has a row, and every picture with a row is used by a chapter. Reports one
+ * error and checks nothing else when IMAGES.md is missing.
  *
  * @param docs - The guide folder.
- * @param draft - Reports pictures still marked placeholder as warnings instead of errors.
+ * @param used - The pictures the chapters use, from {@link picturesUsed}.
+ * @param draft - Reports pictures still marked placeholder, and pictures no chapter uses yet, as
+ * warnings instead of errors.
  */
-async function checkImages(docs: string, draft: boolean, add: Add): Promise<void> {
+async function checkImages(
+  docs: string,
+  used: Map<string, string[]>,
+  draft: boolean,
+  add: Add,
+): Promise<void> {
   const md = await readIfExists(`${docs}/images/IMAGES.md`);
   if (md === undefined) {
     add(
       "ERROR",
-      "images/IMAGES.md is missing: it lists every picture, one row each " +
-        "(placeholder-card.ts creates it)",
+      "images/IMAGES.md is missing: copy templates/images/IMAGES.md from the user-guide skill, " +
+        "fill its Capture it line and give every picture a row",
     );
     return;
   }
@@ -269,6 +326,11 @@ async function checkImages(docs: string, draft: boolean, add: Add): Promise<void
     }
     if (!present.includes(file)) {
       add("ERROR", `${where}: ${file} is listed but images/${file} does not exist`);
+    } else if (IMAGE_FILE.test(file) && !used.has(file)) {
+      add(
+        draft ? "WARN" : "ERROR",
+        `${where}: no chapter uses ${file}; place its figure, or delete the picture and its row`,
+      );
     }
   });
 
@@ -351,11 +413,17 @@ async function main(argv: string[]): Promise<number> {
   if (spine === undefined) {
     add("ERROR", `${SPINE} is missing from ${options.docs}`);
   } else {
-    await checkImages(options.docs, options.draft, add);
+    const chapters: { name: string; text: string }[] = [];
+    for (const name of await namesIn(`${options.docs}/_chapters`, (n) => n.endsWith(".md"))) {
+      chapters.push({ name, text: await Deno.readTextFile(`${options.docs}/_chapters/${name}`) });
+    }
+    const used = picturesUsed(chapters);
+
+    await checkImages(options.docs, used, options.draft, add);
+    checkPrefixes(used, add);
 
     checkText(SPINE, spine, false, options.draft, add);
-    for (const name of await namesIn(`${options.docs}/_chapters`, (n) => n.endsWith(".md"))) {
-      const text = await Deno.readTextFile(`${options.docs}/_chapters/${name}`);
+    for (const { name, text } of chapters) {
       checkText(`_chapters/${name}`, text, true, options.draft, add);
     }
 

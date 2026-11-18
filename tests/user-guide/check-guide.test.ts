@@ -143,6 +143,10 @@ export const tests: Record<string, () => Promise<void>> = {
       "--why", "new picture",
     ]);
     assertEquals(0, made.code, `exit code of the second card (stderr: ${made.stderr.trim()})`);
+    await Deno.writeTextFile(
+      `${docs}/_chapters/02-settings.md`,
+      "# Settings {#sec-settings}\n\n![The settings window.](images/02-settings.png)\n",
+    );
 
     const strict = await check(docs, "--no-render");
     assertEquals(1, strict.code, `exit code (${describe(strict)})`);
@@ -154,6 +158,69 @@ export const tests: Record<string, () => Promise<void>> = {
     assertEquals([], draft.errors, "ERROR lines with --draft");
     assertEquals(1, draft.warnings.length, `WARN lines: ${draft.warnings.join(" / ")}`);
     assert(draft.warnings[0].includes("02-settings.png"), `names the file: ${draft.warnings[0]}`);
+  },
+
+  "a picture no chapter uses fails, draft warns": async () => {
+    const docs = await buildGuide("check-unused");
+    await Deno.writeFile(`${docs}/images/01-spare.png`, await cardPng());
+    await Deno.writeTextFile(
+      `${docs}/images/IMAGES.md`,
+      imagesMd(MAIN_ROW, "| `01-spare.png` | sec-getting-started | Spare. | Nowhere. | captured |"),
+    );
+    await appendTo(
+      `${docs}/_chapters/01-getting-started.md`,
+      "\n```markdown\n![Only an example.](images/01-spare.png)\n```\n",
+    );
+
+    const strict = await check(docs, "--no-render");
+    assertEquals(1, strict.code, `exit code (${describe(strict)})`);
+    assertEquals(1, strict.errors.length, `ERROR lines: ${strict.errors.join(" / ")}`);
+    assert(strict.errors[0].includes("01-spare.png"), `names the file: ${strict.errors[0]}`);
+
+    const draft = await check(docs, "--draft", "--no-render");
+    assertEquals(0, draft.code, `exit code with --draft (${describe(draft)})`);
+    assertEquals(1, draft.warnings.length, `WARN lines: ${draft.warnings.join(" / ")}`);
+  },
+
+  "a picture named for another chapter warns": async () => {
+    const docs = await buildGuide("check-prefix");
+    const chapter = `${docs}/_chapters/01-getting-started.md`;
+    await Deno.writeTextFile(
+      chapter,
+      CHAPTER.replace("images/01-main-window.png", "images/07-main-window.png"),
+    );
+    await Deno.rename(`${docs}/images/01-main-window.png`, `${docs}/images/07-main-window.png`);
+    await Deno.writeTextFile(
+      `${docs}/images/IMAGES.md`,
+      imagesMd(MAIN_ROW.replace("01-main-window.png", "07-main-window.png")),
+    );
+
+    const result = await check(docs, "--no-render");
+    assertEquals(0, result.code, `a warning does not fail the check (${describe(result)})`);
+    assertEquals(1, result.warnings.length, `WARN lines: ${result.warnings.join(" / ")}`);
+    assert(
+      result.warnings[0].includes("rename it 01-main-window.png"),
+      `names the new name: ${result.warnings[0]}`,
+    );
+
+    await Deno.writeTextFile(
+      `${docs}/_chapters/07-reference.md`,
+      "# Reference {#sec-reference}\n\n![Again.](images/07-main-window.png)\n",
+    );
+    const shared = await check(docs, "--no-render");
+    assertEquals([], shared.warnings, "a picture named for one of the chapters using it");
+  },
+
+  "a missing IMAGES.md names the template": async () => {
+    const docs = await buildGuide("check-no-images-md");
+    await Deno.remove(`${docs}/images/IMAGES.md`);
+    const result = await check(docs, "--no-render");
+    assertEquals(1, result.code, `exit code (${describe(result)})`);
+    assertEquals(1, result.errors.length, `ERROR lines: ${result.errors.join(" / ")}`);
+    assert(
+      result.errors[0].includes("templates/images/IMAGES.md"),
+      `points at the template: ${result.errors[0]}`,
+    );
   },
 
   "orphan image fails": async () => {
@@ -451,13 +518,21 @@ export const tests: Record<string, () => Promise<void>> = {
     );
     const result = await check(docs, "--no-render");
     assertEquals(1, result.code, `exit code (${describe(result)})`);
-    for (const fragment of ["stray.png", "ghost.png", "soon.png", "[[AREA_NAME]]", "table"]) {
+    const fragments = [
+      "stray.png",
+      "ghost.png",
+      "soon.png is still a placeholder",
+      "no chapter uses soon.png",
+      "[[AREA_NAME]]",
+      "table",
+    ];
+    for (const fragment of fragments) {
       assert(
         result.errors.some((line) => line.includes(fragment)),
         `an ERROR mentions ${fragment}: ${result.errors.join(" / ")}`,
       );
     }
-    assertEquals(5, result.errors.length, `ERROR lines: ${result.errors.join(" / ")}`);
+    assertEquals(6, result.errors.length, `ERROR lines: ${result.errors.join(" / ")}`);
   },
 
   "a missing --docs is one line": async () => {

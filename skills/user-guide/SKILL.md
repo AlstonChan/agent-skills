@@ -64,8 +64,8 @@ exists and a change alters what a user sees; **adopt** when a Quarto guide exist
 
    The pictures the templates point at need a capture or a card before the first render: three,
    and one overview more for each area added.
-6. **Check as you go** until it prints no `ERROR:` line. `--draft` only warns on cards and template
-   markers; `--no-render` skips the slow render. Read render warnings with
+6. **Check as you go** until it prints no `ERROR:` line. `--draft` only warns on cards, template
+   markers and pictures no chapter uses yet; `--no-render` skips the slow render. Read render warnings with
    [references/quarto.md](references/quarto.md).
 
    ```bash
@@ -110,13 +110,20 @@ exists and a change alters what a user sees; **adopt** when a Quarto guide exist
    `docs/_chapters/`, the pictures in `docs/images/`. Move and rename what differs, with its
    includes and figure paths, or point `--docs` at the folder that already has that layout
    ([references/setup.md](references/setup.md), "Bringing an existing guide under the rules").
-2. **Add the tooling**: `docs/images/IMAGES.md` from the template with its `Capture it:` line
-   filled (the card script refuses one still holding `[[`) and a `captured` row for every picture
-   already there, and `docs/OPEN-QUESTIONS.md`.
-3. **Run `check-guide.ts` with `--draft`** and fix what it reports.
-4. **Apply the rules from then on**: audit and rewrite only the chapters a change touches, never the
+2. **Keep the guide's numbering.** Its chapter files and appendices keep their numbers and order;
+   the `90-` and `A0`–`A2` scheme is for new guides and new chapters. Pictures do follow their
+   chapter: rename each one the check warns about, with its figure.
+3. **Add the tooling**: `docs/images/IMAGES.md` from the template with its `Capture it:` line
+   filled (the card script refuses one still holding `[[`), and `docs/OPEN-QUESTIONS.md`. Give
+   every picture already there a row, after looking at it through the gate: `captured` when it is
+   current and shows no private data, otherwise a card. An existing list of missing or stale
+   pictures becomes their rows, and a logo moves to `docs/brand/`.
+4. **Fold existing guide rules into one place**: rules already written in a README or contributing
+   file give way to the rules section (below), and keep only what that section lacks.
+5. **Run `check-guide.ts` with `--draft`** and fix what it reports.
+6. **Apply the rules from then on**: audit and rewrite only the chapters a change touches, never the
    whole guide at once.
-5. **Report and offer** as a new guide does.
+7. **Report and offer** as a new guide does.
 
 ## Offer the rules
 

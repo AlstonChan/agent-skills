@@ -22,6 +22,10 @@ then power users and admins. The guide must work read front to back and looked u
   room for every area an app has, so adding one never renumbers a reference chapter or its
   pictures. A tenth area is `11-…`, not a reason to move `90-settings.md`.
 - **A section two areas share lives once**, in the chapter that owns it; the other links to it.
+- **Renumbering a chapter file renames its pictures with it**, or they keep the old number: the
+  check warns about each picture named for no chapter that uses it.
+- **An adopted guide keeps its numbering**, extra appendices included; the scheme above is for new
+  guides and the chapters added to them ([setup.md](setup.md)).
 
 Sample Viewer's chapters:
 
@@ -106,8 +110,9 @@ app. Rewrite each chapter whole from the code ([sourcing.md](sourcing.md)), then
   empty"), then numbered checks in the order to try them, each with what to do.
 - **The message index lists every titled dialog and every refusal, warning or error a user can read
   long enough to act on.** Passing notifications that close on their own stay out. One row each:
-  the title in bold, the text in italics quoted exactly, and what to do, with a link to the section
-  that explains it. Sorted by title, so a user finds it from the title bar:
+  the title in bold, the text in italics quoted exactly, and a link to the section that explains
+  it, with what to do when that section does not say it. Sorted by title, so a user finds it from
+  the title bar:
 
   ```markdown
   | **Folder Missing** | *The folder* folder name *no longer exists.* | Choose another folder in **Library** > **Add Folder** (@sec-library-folders). |
@@ -115,6 +120,9 @@ app. Rewrite each chapter whole from the code ([sourcing.md](sourcing.md)), then
 
   A variable part of the text is a plain word that names it inside the italics, as the folder name
   is above for the code's `"The folder {0} no longer exists."`.
+- **A long index may be grouped by when the message appears** ("Opening an item", "Saving"), one
+  captioned table per group, sorted by title inside each. A message that can appear in two groups
+  is listed in the one where users meet it first.
 
 ## Illustrations
 

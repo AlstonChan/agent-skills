@@ -10,8 +10,9 @@ as `quarto run <skill>/scripts/check-guide.ts …`.
 
 - **Quarto 1.10 or later**, tested on 1.10.18. Quarto ships Typst and the Deno runtime the
   scripts run on, so nothing else is installed: no LaTeX, no Node.
-- **The guide lives in `docs/`.** The placeholder card prints `docs/images` as the place to save a
-  capture, and the rules and examples assume that folder.
+- **The guide lives in `docs/`.** The rules and examples assume that folder. The placeholder card
+  names the folder to save a capture in from `--docs`, so give it as a path from the repository
+  root: `--docs docs`.
 
 ## 1. Copy the templates
 
@@ -183,8 +184,9 @@ quarto render docs/user-guide.qmd -M subtitle="Version 2.3.0"
 ```
 
 The check prints one `ERROR:` or `WARN:` line per problem and exits 1 on any `ERROR:`, so the
-release stops on a card, a template marker or a render warning. `WARN:` lines appear only with
-`--draft` and never fail it; a release check never passes `--draft`. The release's own version
+release stops on a card, a template marker or a render warning. `WARN:` lines never fail it: with
+`--draft` they report what a release would refuse, and without it only a picture named for another
+chapter, which a rename fixes. A release check never passes `--draft`. The release's own version
 fills the stamp: the tag it builds, or the `git describe --tags` form for a build that is not a
 release. CI needs the tags for that, so its checkout fetches the full history.
 
@@ -244,11 +246,33 @@ only what it lacks.
   anywhere else is never checked, and a missing `docs/user-guide.qmd` is the only error it prints.
   Move and rename what differs, and update the spine's includes and the figure paths with it.
 - **A guide that keeps its own folder** gets `--docs <that folder>` on both scripts instead, as
-  long as the folder holds that layout. The card still tells its reader to save the capture in
-  `docs/images`, so prefer moving the guide to `docs/`.
-- **Copy `<skill>/templates/images/IMAGES.md`** to `docs/images/IMAGES.md`, fill its `Capture it:`
-  line ([2. Fill the tokens](#2-fill-the-tokens)), and add a `captured` row for every picture
-  already there. The card script refuses to run while that line still holds `[[`.
+  long as the folder holds that layout. The rules and examples still say `docs/`, so prefer moving
+  the guide there.
+- **Keep the guide's numbering.** Chapter files and appendices keep their numbers, order and
+  letters; the scheme in [writing.md](writing.md) is for new guides and the chapters added later.
+  Renumbering an adopted guide only moves its pictures and its readers' bookmarks.
+- **Rename each picture named for another chapter** to its chapter file's prefix, with its figure:
+  a guide whose chapters were renumbered keeps pictures on the old numbers, and the check warns
+  about each one, naming the new name. A picture several chapters use keeps the prefix of one of
+  them.
+
+  ```bash
+  git mv docs/images/12-viewer-zoom.png docs/images/03-viewer-zoom.png
+  ```
+
+- **Copy `<skill>/templates/images/IMAGES.md`** to `docs/images/IMAGES.md` and fill its
+  `Capture it:` line ([2. Fill the tokens](#2-fill-the-tokens)). The card script refuses to run
+  while that line still holds `[[`.
+- **Give every picture already there a row**, and look at each before calling it `captured`:
+  through the gate of [screenshots.md](screenshots.md), it must show no private data, and must
+  still match its screen. A picture that fails either becomes a card. An existing list of
+  placeholder or stale pictures becomes their rows; take Shows and How from it, and from each
+  figure's caption.
+- **Move a logo out of `docs/images/`** into `docs/brand/`, and its path in `_brand.yml` with it
+  ([6. Logo](#6-logo)).
 - **Copy `<skill>/templates/OPEN-QUESTIONS.md`** to `docs/OPEN-QUESTIONS.md`.
+- **Fold existing guide rules into the rules section.** Rules already written for the guide in a
+  README or contributing file give way to [rules.md](rules.md) in `CLAUDE.md` or `AGENTS.md`: keep
+  there only what the section lacks, and leave a pointer where they stood.
 - **Run the check with `--draft`** and fix what it reports. From then on, apply the rules to each
   chapter a change touches, not to the whole guide at once.

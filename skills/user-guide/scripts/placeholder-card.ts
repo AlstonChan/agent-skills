@@ -7,6 +7,8 @@
  *
  * Writes `<dir>/images/<name.png>` and upserts that picture's row in `<dir>/images/IMAGES.md`.
  * `--capture` defaults to the "Capture it:" line of IMAGES.md; a new IMAGES.md needs it.
+ * The card names the folder to save the capture in as `<dir>/images` when `<dir>` is relative,
+ * and by the folder's own name when it is absolute, so pass `<dir>` from the repository root.
  * Exits 0 on success; on failure exits 1 with one message line on stderr.
  *
  * A warning from Typst counts as a failure. The usual one is an unknown font: Typst then falls
@@ -102,7 +104,7 @@ function typstWarning(stderr: string): string | undefined {
  */
 async function drawCard(
   imagesDir: string,
-  card: { file: string; shows: string; how: string; capture: string },
+  card: { file: string; shows: string; how: string; capture: string; folder: string },
 ): Promise<void> {
   const work = await Deno.makeTempDir({ prefix: `${NAME}-` });
   try {
@@ -188,6 +190,18 @@ function upsertRow(
 }
 
 /**
+ * Returns the images folder as the card names it, with forward slashes: `<docs>/images` for a
+ * relative `docs`, or the folder's own name plus `/images` for an absolute one, which would
+ * otherwise print a path that exists only on the machine that drew the card.
+ */
+function shownFolder(docs: string): string {
+  const slashed = docs.replace(/\\/g, "/");
+  if (!/^([A-Za-z]:)?\//.test(slashed)) return `${slashed}/images`;
+  const name = slashed.split("/").filter((part) => part !== "").pop();
+  return `${name === undefined || /^[A-Za-z]:$/.test(name) ? "docs" : name}/images`;
+}
+
+/**
  * Draws the card, then writes its row to IMAGES.md; IMAGES.md is touched only after the card was
  * written.
  *
@@ -213,6 +227,7 @@ async function main(argv: string[]): Promise<void> {
     shows: args.shows,
     how: args.how,
     capture,
+    folder: shownFolder(docs),
   });
 
   /** Escapes the pipes in a value so it stays inside one table cell. */

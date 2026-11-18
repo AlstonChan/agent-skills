@@ -33,12 +33,17 @@ file per chapter in `docs/_chapters/`, every picture in `docs/images/`.
   with `@sec-…` instead of repeating it.
 - **The message index lists every titled dialog and every refusal, warning or error a user can
   read long enough to act on**, quoted exactly; a notification that closes on its own stays out. A
-  change that adds, rewords or removes one changes its row.
+  change that adds, rewords or removes one changes its row. A long index is grouped by when the
+  message appears, sorted by title inside each group.
 - **Pictures by default**: one per screen or dialog a user meets, named
   `<chapter number>-<what>.png` in `docs/images/`, where the chapter number is the chapter file's
-  prefix (`02-library-search.png` for the Library chapter, `02-library.md`).
+  prefix (`02-library-search.png` for the Library chapter, `02-library.md`). A chapter file that is
+  renumbered renames its pictures with it; the check warns about a picture named for no chapter
+  that uses it.
 - **`docs/images/IMAGES.md` lists every picture**, one row each, with status `captured` or
-  `placeholder: <why>`. A picture with no row, or a row with no picture, fails the check:
+  `placeholder: <why>`. A picture used in more than one section lists each id in its Section cell,
+  separated by commas. A picture with no row, a row with no picture, or a picture no chapter uses
+  fails the check:
 
   ```text
   | `02-library-search.png` | sec-library-search | The Library list narrowed by Search | Open Sample Viewer, choose Library, type "tile" in Search | captured |

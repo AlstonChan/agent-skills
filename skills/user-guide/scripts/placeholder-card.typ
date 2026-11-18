@@ -37,6 +37,7 @@
     "Capture it",
     breakable(sentence(card.capture))
       + " Save it as " + breakable(card.file)
-      + " in docs/images and mark its row captured in docs/images/IMAGES.md.",
+      + " in " + breakable(card.folder)
+      + " and mark its row captured in " + breakable(card.folder + "/IMAGES.md") + ".",
   )
 ]

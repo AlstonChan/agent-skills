@@ -44,7 +44,9 @@ last one; a retaken card has its Status changed to `captured`:
 ```
 
 - **Columns**: the file name in backticks, the section id the picture sits in, what it shows, how
-  to get there, the status (`captured`, or `placeholder: <why>`).
+  to get there, the status (`captured`, or `placeholder: <why>`). A picture shown in more than one
+  section lists every id, separated by commas (`sec-library-search, sec-viewer-open`), so a search
+  for either section finds it; give the card script the same list in `--section`.
 - **Leave the header and the `| :--- |` separator row as the template has them.** The card script
   recognises that separator and no other spelling of it (`|---|` is not found), and the check reads
   a line as a row only when it starts with `` | ` `` and the file name.

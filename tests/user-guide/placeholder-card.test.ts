@@ -134,8 +134,8 @@ export const tests: Record<string, () => Promise<void>> = {
   },
 
   "same inputs give the same bytes": async () => {
-    const first = await newTestDir("card-bytes-a");
-    const second = await newTestDir("card-bytes-b");
+    const first = `${await newTestDir("card-bytes-a")}/docs`;
+    const second = `${await newTestDir("card-bytes-b")}/docs`;
     await generateOk(first, card());
     await generateOk(second, card());
     const a = await Deno.readFile(`${first}/images/01-main-window.png`);
